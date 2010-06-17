@@ -29,6 +29,38 @@ abstract class Signature implements SignatureInterface
         );
     }
 
+
+    protected function _getBaseString()
+    {
+        $parts = array();
+
+        // 1. Request method
+        $parts[0] = rawurlencode($this->_getBaseStringRequestMethod());
+
+        // 2. Base string URI
+        $parts[1] = rawurlencode($this->_getBaseStringURI());
+
+        // 3. Request parameters
+        $parts[2] = rawurlencode($this->_getNormalizedParameters());
+
+        return implode($parts, '&');
+    }
+
+    private function _getBaseStringRequestMethod()
+    {
+        return strtoupper($this->_request->getRequestMethod());
+    }
+
+    private function _getBaseStringURI()
+    {
+        return $this->_request->getBaseStringURI();
+    }
+
+    private function _getNormalizedParameters()
+    {
+        return $this->_normalizeParameters($this->_request->getParameters());
+    }
+
     /**
      * Normalizes the the parameters
      * @param <type> $parameters
@@ -37,8 +69,9 @@ abstract class Signature implements SignatureInterface
     {
         $encoded = $this->_encodeParameters($parameters);
         $sorted = $this->_sortParameters($encoded);
+        $joined = $this->_joinParameters($sorted);
 
-        return $sorted;
+        return implode('&', $joined);
     }
 
     /**
@@ -212,6 +245,22 @@ abstract class Signature implements SignatureInterface
         while ($sort === 0 && $i++ < $max - 1);
 
         return $sort;
+    }
+
+    /**
+     * Joins each key/value pair with '='
+     * 
+     * @param array $parameters  key/value pairs
+     */
+    private function _joinParameters($parameters)
+    {
+        $joined = array();
+        foreach($parameters as $key => $value)
+        {
+            $joined[] = $key . '=' . $value;
+        }
+        
+        return $joined;
     }
 
 }

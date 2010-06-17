@@ -66,12 +66,16 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
                 . ' parameters:' . rtrim(implode(', ', $missing), ', '));
         }
 
-        // Build the string
-        $parameters = $this->_request->getParameters();
-        $normalizedParameters = $this->_normalizeParameters($parameters);
-
-        // $keyString = somsumersecret&tokensecret
-        // $signature = hash_hmac('sha1', $base_string, $keyString, true)
+        // Get the base string
+        $baseString = $this->_getBaseString();
+        
+        $keyString = $this->_consumerCredential->getSecret() . '&';
+        if(null !== $this->_accessCredential)
+        {
+            $keyString .= $this->_accessCredential->getSecret();
+        }
+        
+        return base64_encode(hash_hmac('sha1', $baseString, $keyString, true));
     }
 
     /**
