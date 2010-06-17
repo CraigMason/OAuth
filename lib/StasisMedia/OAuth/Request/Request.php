@@ -11,7 +11,7 @@ namespace StasisMedia\OAuth\Request;
  * @package     OAuth
  * @subpackage  Request
  */
-class Request
+class Request implements RequestInterface
 {
     /*
      * A number of parameters are USUALLY required, but when using PLAINTEXT

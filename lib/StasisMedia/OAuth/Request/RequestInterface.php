@@ -1,0 +1,20 @@
+<?php
+namespace StasisMedia\OAuth\Request;
+
+/**
+ * OAuth 1.0 Request interface
+ *
+ * A single request type to a Service Provider. One of:
+ * * Temporary Credential Request
+ * * Resource Owner Authorization
+ * * Token Request
+ *
+ * @author      Craig Mason <craig.mason@stasismedia.com>
+ * @package     OAuth
+ * @subpackage  Request
+ */
+interface RequestInterface
+{
+    public function hasRequiredParameters();
+    public function getParameters();
+}
