@@ -22,11 +22,14 @@ class TemporaryCredentials extends Request implements RequestInterface
     private $_consumerCredentials;
 
     /**
-     * The callback URL the Provider will return to
+     * The callback URL the Provider will call
      * @var string
      */
     private $_callbackUrl;
 
+    /**
+     * Set up the required OAuth parameters
+     */
     public function __construct()
     {
         parent::__construct();
@@ -36,6 +39,10 @@ class TemporaryCredentials extends Request implements RequestInterface
         ));
     }
 
+    /**
+     * Set the Consumer Credential
+     * @param Consumer $consumerCredentials
+     */
     public function setConsumerCredentials(Consumer $consumerCredentials)
     {
         $this->_consumerCredentials = $consumerCredentials;
@@ -45,6 +52,11 @@ class TemporaryCredentials extends Request implements RequestInterface
         ));
     }
 
+    /**
+     * The callback URL the Provider will call
+     * 
+     * @param <type> $callbackUrl
+     */
     public function setCallbackUrl($callbackUrl)
     {
         $this->_callbackUrl = $callbackUrl;
