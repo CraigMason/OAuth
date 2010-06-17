@@ -19,6 +19,7 @@ use StasisMedia\OAuth\Request\RequestInterface;
 Interface SignatureInterface
 {
     public function __construct(RequestInterface $request);
-    
+
+    public function getSignatureMethod();
     public function buildSignature();
 }
