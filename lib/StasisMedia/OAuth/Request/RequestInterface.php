@@ -18,12 +18,14 @@ interface RequestInterface
     public function addRequiredOAuthParameters(array $parameters);
     public function addOptionalOAuthParameters(array $parameters);
 
+    public function setRequestMethod($method);
+    public function getRequestMethod();
+    public function setUrl($url);
+    public function getUrl();
+
     public function setParameter($parameter, $value);
     public function setParameters($parameters);
     public function getParameters();
-
-    public function setRequestMethod($method);
-    public function getRequestMethod();
 
     public function hasRequiredParameters();
     public function getMissingParameters();

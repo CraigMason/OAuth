@@ -151,11 +151,26 @@ class Request implements RequestInterface
         return $this->_parameters;
     }
 
+    /**
+     * Set the endpoint of the Request
+     *
+     * @param String $url
+     */
     public function setUrl($url)
     {
         $this->_url = $url;
 
         $this->_urlComponents = parse_url($this->_url);
+    }
+
+    /**
+     * Get the endpoint of the Request
+     * 
+     * @return String
+     */
+    public function getUrl()
+    {
+        return $this->_url;
     }
 
     /**
