@@ -1,6 +1,8 @@
 <?php
 Namespace StasisMedia\OAuth\Signature;
 
+use StasisMedia\OAuth\Exception;
+use StasisMedia\OAuth\Request;
 /**
  * OAuth 1.0 HMAC SHA1 Signature
  * http://tools.ietf.org/html/rfc5849#section-3.4.2
@@ -11,7 +13,7 @@ Namespace StasisMedia\OAuth\Signature;
  */
 class HMAC_SHA1 extends Signature implements SignatureInterface
 {
-    public function __construct(RequestInterface $request)
+    public function __construct(Request\RequestInterface $request)
     {
         parent::__construct($request);
 
@@ -23,5 +25,12 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
         ));
     }
 
-    public function buildSignature(){}
+    public function buildSignature()
+    {
+        if(false === $this->_request->hasRequiredParameters())
+        {
+            throw new Exception\ParameterException('Some required oauth_ 
+                parameters are missing from the request.');
+        }
+    }
 }
