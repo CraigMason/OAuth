@@ -38,4 +38,9 @@ class TemporaryCredentials extends Request implements RequestInterface
             'oauth_consumer_key' => $this->_consumerCredentials->getKey()
         ));
     }
+
+    public function setCallbackUrl($callbackUrl)
+    {
+        $this->setParameter('oauth_callback', $callbackUrl);
+    }
 }
