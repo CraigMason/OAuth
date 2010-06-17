@@ -45,6 +45,18 @@ class Request implements RequestInterface
     private $_requestMethod = 'GET';
 
     /**
+     * Full URL of this request
+     * @var string
+     */
+    private $_url;
+
+    /**
+     * URL components (from parse_url()) of the URL for this request
+     * @var array
+     */
+    private $_urlComponents;
+
+    /**
      * Adds the required and optional parameters for all requests
      */
     public function __construct()
@@ -135,9 +147,78 @@ class Request implements RequestInterface
         return $this->_parameters;
     }
 
+    public function setUrl($url)
+    {
+        $this->_url = $url;
+
+        $this->_urlComponents = parse_url($this->_url);
+    }
+
+    /**
+     * The HTTP (or other, custom) request method
+     * @param string $method
+     */
+    public function setRequestMethod($method)
+    {
+        $this->_requestMethod = $method;
+    }
+
+    /**
+     * Constructs the base string
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
+     */
     public function getBaseString()
     {
+        $parts = $this->_urlComponents;
         
+        // http://host
+        $baseString =
+            strtolower($parts['scheme'])
+            . '://'
+            . strtolower($parts['host']);
+        
+        /*
+         * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
+         * 
+         * The port MUST be included if it is not the default port for the
+         * scheme, and MUST be excluded if it is the default.  Specifically,
+         * the port MUST be excluded when making an HTTP request [RFC2616]
+         * to port 80 or when making an HTTPS request [RFC2818] to port 443.
+         * All other non-default port numbers MUST be included.
+         */
+        $scheme = $parts['scheme'];
+        $port = array_key_exists('port', $parts) ? $parts['port'] : '';
+        
+        if( empty($port) === false)
+        {
+           switch($port)
+           {
+               case 80:
+                   if($scheme != 'http') $baseString .= ':' . $port;
+                   break;
+               case 443:
+                   if($scheme != 'http') $baseString .= ':' . $port;
+                   break;
+               default:
+                   $baseString .= ':' . $port;
+                   break;
+           }
+        }
+
+        // Add the path
+        $path = array_key_exists('path', $parts) ? $parts['path'] : '/';
+        $baseString .= $path;
+
+        // Add the query string
+        $queryString = array_key_exists('query', $parts) ? $parts['query'] : '';
+        if(empty($queryString) == false)
+        {
+            $baseString .= '?' . $queryString;
+        }
+
+        // Ignore fragment
+
+        return $baseString;
     }
 
 }
