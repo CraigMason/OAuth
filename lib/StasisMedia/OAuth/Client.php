@@ -24,12 +24,28 @@ class Client
     private $_connector;
 
     /**
+     * Request type
+     * @var Request\RequestInterface
+     */
+    private $_request;
+
+    /**
+     * Signature algorithm
+     * @var Signature\SignatureInterface
+     */
+    private $_signature;
+
+    /**
      *
      * @param   ConnectorInterface $connector The HTTP connector to use when
      *          communicating with the Service Provider
      */
-    public function __construct(Connector\ConnectorInterface $connector)
+    public function __construct(Connector\ConnectorInterface $connector,
+                                Request\RequestInterface $request,
+                                Signature\SignatureInterface $signature)
     {
         $this->_connector = $connector;
+        $this->_request = $request;
+        $this->_signature = $signature;
     }
 }
