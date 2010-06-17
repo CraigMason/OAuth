@@ -22,6 +22,9 @@ interface RequestInterface
     public function setParameters($parameters);
     public function getParameters();
 
+    public function setRequestMethod($method);
+    public function getRequestMethod();
+
     public function hasRequiredParameters();
     public function getMissingParameters();
     

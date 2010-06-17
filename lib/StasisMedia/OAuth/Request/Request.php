@@ -162,6 +162,16 @@ class Request implements RequestInterface
         $this->_requestMethod = $method;
     }
 
+
+    /**
+     * The HTTP (or other, custom) request method
+     * @return string $method
+     */
+    public function getRequestMethod()
+    {
+        return $this->_requestMethod;
+    }
+
     /**
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
