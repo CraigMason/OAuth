@@ -13,6 +13,10 @@ use StasisMedia\OAuth\Request;
  */
 class Curl implements Connector\ConnectorInterface
 {
+    const TRANSMIT_AUTHORIZATION_HEADER = 'authorization_header';
+    const FORM_ENCODED_BODY             = 'form_encoded_body';
+    const REQUEST_URI_QUERY             = 'request_uri_query';
+
     /**
      * The CURL handle
      * @var Resource
@@ -26,6 +30,11 @@ class Curl implements Connector\ConnectorInterface
     private $_curlOptions = array();
 
     /**
+     * The transmission method to use for oauth_ and protocol parameters
+     * @var <type>
+     */
+    private $_transmissionMethod = self::TRANSMIT_AUTHORIZATION_HEADER;
+
      * Request
      * @var Request\RequestInterface;
      */

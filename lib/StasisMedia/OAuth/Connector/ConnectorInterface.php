@@ -18,4 +18,6 @@ interface ConnectorInterface
     public function prepare(Request\RequestInterface $request);
     public function execute();
     public function getResponse();
+
+    public function setTransmissionMethod($method);
 }
