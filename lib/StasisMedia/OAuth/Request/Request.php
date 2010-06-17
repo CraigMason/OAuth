@@ -45,7 +45,8 @@ class Request implements RequestInterface
     {
         // Required parameters
         $this->addRequiredOAuthParameters(array(
-            'oauth_consumer_key'
+            'oauth_consumer_key',
+            'oauth_signature_method'
         ));
 
         // Optional parameters
