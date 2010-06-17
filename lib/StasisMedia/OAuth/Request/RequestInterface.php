@@ -25,6 +25,6 @@ interface RequestInterface
     public function hasRequiredParameters();
     public function getMissingParameters();
     
-    public function getBaseString();
+    public function getBaseStringURI();
     
 }

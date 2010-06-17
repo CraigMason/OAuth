@@ -166,12 +166,12 @@ class Request implements RequestInterface
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
      */
-    public function getBaseString()
+    public function getBaseStringURI()
     {
         $parts = $this->_urlComponents;
         
         // http://host
-        $baseString =
+        $baseStringURI =
             strtolower($parts['scheme'])
             . '://'
             . strtolower($parts['host']);
@@ -193,31 +193,23 @@ class Request implements RequestInterface
            switch($port)
            {
                case 80:
-                   if($scheme != 'http') $baseString .= ':' . $port;
+                   if($scheme != 'http') $baseStringURI .= ':' . $port;
                    break;
                case 443:
-                   if($scheme != 'http') $baseString .= ':' . $port;
+                   if($scheme != 'http') $baseStringURI .= ':' . $port;
                    break;
                default:
-                   $baseString .= ':' . $port;
+                   $baseStringURI .= ':' . $port;
                    break;
            }
         }
 
         // Add the path
         $path = array_key_exists('path', $parts) ? $parts['path'] : '/';
-        $baseString .= $path;
+        $baseStringURI .= $path;
 
-        // Add the query string
-        $queryString = array_key_exists('query', $parts) ? $parts['query'] : '';
-        if(empty($queryString) == false)
-        {
-            $baseString .= '?' . $queryString;
-        }
-
-        // Ignore fragment
-
-        return $baseString;
+        // Ignore the query string and fragment
+        return $baseStringURI;
     }
 
 }
