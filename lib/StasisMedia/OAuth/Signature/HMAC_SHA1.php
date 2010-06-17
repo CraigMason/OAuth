@@ -3,7 +3,7 @@ Namespace StasisMedia\OAuth\Signature;
 
 use StasisMedia\OAuth\Exception;
 use StasisMedia\OAuth\Request;
-
+use StasisMedia\OAuth\Credential;
 
 /**
  * OAuth 1.0 HMAC SHA1 Signature
@@ -16,6 +16,19 @@ use StasisMedia\OAuth\Request;
 class HMAC_SHA1 extends Signature implements SignatureInterface
 {
     const SIGNATURE_METHOD = 'HMAC-SHA1';
+
+    /**
+     *
+     * @var Credential\Consumer
+     */
+    private $_consumerCredential;
+
+    /**
+     *
+     * @var Credential\Access
+     */
+    private $_accessCredential;
+    
 
     public function __construct(Request\RequestInterface $request)
     {
@@ -61,6 +74,24 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
         // $signature = hash_hmac('sha1', $base_string, $keyString, true)
     }
 
+    /**
+     * Set the Consumer Credential
+     *
+     * @param Consumer $consumerCredential
+     */
+    public function setConsumerCredential(Credential\Consumer $consumerCredential)
+    {
+        $this->_consumerCredential = $consumerCredential;
+    }
 
+    /**
+     * Set the Access Credential
+     * 
+     * @param Access $accessCredential
+     */
+    public function setAccessCredential(Credential\Access $accessCredential)
+    {
+        $this->_accessCredential = $accessCredential;
+    }
 
 }
