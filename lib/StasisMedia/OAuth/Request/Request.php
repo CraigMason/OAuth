@@ -103,4 +103,9 @@ class Request implements RequestInterface
         return true;
     }
 
+    public function getParameters()
+    {
+        return $this->_parameters;
+    }
+
 }

@@ -17,6 +17,4 @@ abstract class Signature implements SignatureInterface
     {
         $this->_request = $request;
     }
-
-    abstract public function buildSignature();
 }
