@@ -36,6 +36,12 @@ class Client
     private $_signature;
 
     /**
+     * A unix timestamp
+     * @var int
+     */
+    private $_timestamp;
+
+    /**
      *
      * @param   ConnectorInterface $connector The HTTP connector to use when
      *          communicating with the Service Provider
@@ -47,5 +53,38 @@ class Client
         $this->_connector = $connector;
         $this->_request = $request;
         $this->_signature = $signature;
+    }
+
+    /**
+     * Generates a 64-bit one-time nonce
+     *
+     * @return string The unique nonce
+     */
+    private function _generateNonce()
+    {
+        return md5(uniqid(rand(), true));
+    }
+
+    /**
+     * Returns the current unix timestamp
+     * @return <type>
+     */
+    private function _generateTimestamp()
+    {
+        return time();
+    }
+
+    /**
+     * We allow timestamps to be set, as the OAuth spec does not excplicitly
+     * specify how timestamps should synhronize between Consumer and Provider.
+     * Perhaps you want to use a UTC time, or perhaps your Provider needs a
+     * timestamp within a specified timeframe.
+     *
+     * If a timestamp is set with this method, it will be used as a parameter
+     * in the Request
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->_timestamp = $timestamp;
     }
 }
