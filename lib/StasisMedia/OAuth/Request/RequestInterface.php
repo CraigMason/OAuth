@@ -26,6 +26,7 @@ interface RequestInterface
     public function setParameter($parameter, $value);
     public function setParameters($parameters);
     public function getParameters();
+    public function getOAuthParameters();
 
     public function hasRequiredParameters();
     public function getMissingParameters();

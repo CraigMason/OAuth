@@ -151,6 +151,19 @@ class Request implements RequestInterface
         return $this->_parameters;
     }
 
+    public function getOAuthParameters()
+    {
+        $oauthParameters = array();
+        foreach($this->_parameters as $key => $value)
+        {
+            // Identical to 0, begins with
+            if(strpos($key, 'oauth_') === 0)
+            {
+                $oauthParameters[$key] = $value;
+            }
+        }
+    }
+
     /**
      * Set the endpoint of the Request
      *
