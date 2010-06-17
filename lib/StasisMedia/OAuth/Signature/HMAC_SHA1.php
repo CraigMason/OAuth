@@ -53,28 +53,48 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
     }
 
     /**
-     * Generates the signature for the request
+     * Generates the signature for the request.
+     *
+     * Will throw an Exception if any required parameter or Credential
+     * is missing
      * 
      * @return string The base64 encoded HMAC-SHA1 signature
      */
     public function generateSignature()
     {
+        // Check for any missing parameters
         if(false === $this->_request->hasRequiredParameters())
         {
             $missing = $this->_request->getMissingParameters();
-            throw new Exception\ParameterException('Missing required oauth_'
-                . ' parameters:' . rtrim(implode(', ', $missing), ', '));
+            throw new Exception\ParameterException(
+                'Missing required oauth_ parameters:'
+                . rtrim(implode(', ', $missing), ', ')
+            );
         }
 
+        // Check if the Consumer Credential is missing
+        if(null == $this->_consumerCredential)
+        {
+            throw new \Exception('HMAC_SHA1 requires a Consumer Credential');
+        }
+
+        return $this->_generateSignature();
+    }
+
+    /**
+     * Performs the actual signature generation
+     */
+    private function _generateSignature()
+    {
         // Get the base string
         $baseString = $this->_getBaseString();
-        
+
         $keyString = $this->_consumerCredential->getSecret() . '&';
         if(null !== $this->_accessCredential)
         {
             $keyString .= $this->_accessCredential->getSecret();
         }
-        
+
         return base64_encode(hash_hmac('sha1', $baseString, $keyString, true));
     }
 
