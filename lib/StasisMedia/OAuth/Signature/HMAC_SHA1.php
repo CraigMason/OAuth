@@ -11,5 +11,17 @@ Namespace StasisMedia\OAuth\Signature;
  */
 class HMAC_SHA1 extends Signature implements SignatureInterface
 {
+    public function __construct(RequestInterface $request)
+    {
+        parent::__construct($request);
+
+        // Set the other required parameters
+        $request->addRequiredOAuthParameters(array(
+            'oauth_timestamp',
+            'oauth_nonce',
+            'oauth_timestamp',
+        ));
+    }
+
     public function buildSignature(){}
 }
