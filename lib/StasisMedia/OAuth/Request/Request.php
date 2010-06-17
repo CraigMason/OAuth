@@ -129,7 +129,7 @@ class Request implements RequestInterface
      */
     public function setParameter($parameter, $value)
     {
-        array_merge($this->_parameters, array($parameter => $value));
+        $this->setParameters(array($parameter => $value));
     }
 
     /**
@@ -138,7 +138,7 @@ class Request implements RequestInterface
      */
     public function setParameters($parameters)
     {
-        array_merge($this->_parameters, $parameters);
+        $this->_parameters = array_merge($this->_parameters, $parameters);
     }
 
     public function getParameters()
