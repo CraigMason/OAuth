@@ -1,6 +1,7 @@
 <?php
 namespace StasisMedia\OAuth\Connector;
 
+use StasisMedia\OAuth\Request;
 /**
  * OAuth 1.0 connector interface
  *
@@ -14,5 +15,7 @@ namespace StasisMedia\OAuth\Connector;
  */
 interface ConnectorInterface
 {
-    
+    public function prepare(Request\RequestInterface $request);
+    public function execute();
+    public function getResponse();
 }

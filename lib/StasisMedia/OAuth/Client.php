@@ -42,6 +42,18 @@ class Client
     private $_timestamp;
 
     /**
+     * Are the Request and Connector prepared?
+     * @var bool
+     */
+    private $_prepared = false;
+
+    /**
+     * Has the request been executed?
+     * @var bool
+     */
+    private $_executed = false;
+
+    /**
      *
      * @param   ConnectorInterface $connector The HTTP connector to use when
      *          communicating with the Service Provider
@@ -86,5 +98,31 @@ class Client
     public function setTimestamp($timestamp)
     {
         $this->_timestamp = $timestamp;
+    }
+
+    /**
+     * Prepares the connector for execution. We provide 'prepare' as a seperate
+     * method, as users may with to utilise curl_multi or other connectors
+     */
+    public function prepare()
+    {
+        $this->_connector->prepare($this->_request);
+
+        $this->_prepared = true;
+    }
+
+    public function execute()
+    {
+        if($this->_prepared === false) $this->prepare();
+
+        // Execute
+        $this->_connector->execute();
+
+        $this->_executed = true;
+    }
+
+    public function getResponse()
+    {
+        return $this->_connector->getResponse();
     }
 }
