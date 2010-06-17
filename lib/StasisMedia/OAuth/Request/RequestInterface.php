@@ -19,4 +19,5 @@ interface RequestInterface
     public function addOptionalOAuthParameters(array $parameters);
     public function hasRequiredParameters();
     public function getParameters();
+    public function getBaseString();
 }

@@ -39,6 +39,12 @@ class Request implements RequestInterface
     private $_parameters = array();
 
     /**
+     * The HTTP Request method
+     * @var string
+     */
+    private $_requestMethod = 'GET';
+
+    /**
      * Adds the required and optional parameters for all requests
      */
     public function __construct()
@@ -127,6 +133,11 @@ class Request implements RequestInterface
     public function getParameters()
     {
         return $this->_parameters;
+    }
+
+    public function getBaseString()
+    {
+        
     }
 
 }
