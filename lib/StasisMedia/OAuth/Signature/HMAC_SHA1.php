@@ -39,7 +39,12 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
         return self::SIGNATURE_METHOD;
     }
 
-    public function buildSignature()
+    /**
+     * Generates the signature for the request
+     * 
+     * @return string The base64 encoded HMAC-SHA1 signature
+     */
+    public function generateSignature()
     {
         if(false === $this->_request->hasRequiredParameters())
         {
