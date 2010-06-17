@@ -13,6 +13,11 @@ namespace StasisMedia\OAuth\Request;
  */
 class Request implements RequestInterface
 {
+    const GET  =   'GET';
+    const POST =   'POST';
+    const PUT  =   'PUT';
+    const DELETE = 'DELETE';
+
     /*
      * A number of parameters are USUALLY required, but when using PLAINTEXT
      * signature method, many can be excluded. 
