@@ -15,6 +15,8 @@ namespace StasisMedia\OAuth\Request;
  */
 interface RequestInterface
 {
+    public function addRequiredOAuthParameters(array $parameters);
+    public function addOptionalOAuthParameters(array $parameters);
     public function hasRequiredParameters();
     public function getParameters();
 }
