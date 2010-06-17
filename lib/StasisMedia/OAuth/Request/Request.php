@@ -103,6 +103,26 @@ class Request implements RequestInterface
         return true;
     }
 
+    /**
+     * Adds the parameter and value to this request's parameters
+     *
+     * @param string $parameter
+     * @param string $value
+     */
+    public function setParameter($parameter, $value)
+    {
+        array_merge($this->_parameters, array($parameter => $value));
+    }
+
+    /**
+     * Sets an array of parameters
+     * @param array $parameters
+     */
+    public function setParameters($parameters)
+    {
+        array_merge($this->_parameters, $parameters);
+    }
+
     public function getParameters()
     {
         return $this->_parameters;
