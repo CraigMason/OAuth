@@ -11,6 +11,10 @@ use StasisMedia\OAuth\Request\RequestInterface;
  */
 abstract class Signature implements SignatureInterface
 {
+    /**
+     *
+     * @var RequestInterface
+     */
     protected $_request;
 
     public function __construct(RequestInterface $request)
