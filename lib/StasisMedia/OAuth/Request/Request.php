@@ -110,16 +110,15 @@ class Request implements RequestInterface
      */
     public function hasRequiredParameters()
     {
-        // Check if any required parameters are missing
-        foreach($this->_requiredOAuthParameters as $requiredParameter)
-        {
-            if(!in_array($requiredParameter, $this->_parameters))
-            {
-                return false;
-            }
-        }
+        $missingParameters = $this->getMissingParameters();
+        if(count($missingParameters) > 0) return false;
 
         return true;
+    }
+
+    public function getMissingParameters()
+    {
+        return array_diff($this->_requiredOAuthParameters, array_keys($this->_parameters));
     }
 
     /**
