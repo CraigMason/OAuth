@@ -41,8 +41,9 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
     {
         if(false === $this->_request->hasRequiredParameters())
         {
-            throw new Exception\ParameterException('Some required oauth_'
-                . ' parameters are missing from the request.');
+            $missing = $this->_request->getMissingParameters();
+            throw new Exception\ParameterException('Missing required oauth_'
+                . ' parameters:' . rtrim(implode(', ', $missing), ', '));
         }
 
         // Build the string
