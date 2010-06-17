@@ -20,5 +20,10 @@ abstract class Signature implements SignatureInterface
     public function __construct(RequestInterface $request)
     {
         $this->_request = $request;
+
+        $this->_request->setParameter(
+                'oauth_signature_method',
+                $this->getSignatureMethod()
+        );
     }
 }
