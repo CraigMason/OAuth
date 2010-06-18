@@ -98,6 +98,10 @@ abstract class Signature implements SignatureInterface
         // Only encode strings
         $key = is_string($key) ? $this->_utf8Encode($key) : $key;
         $value = is_string($value) ? $this->_utf8Encode($value) : $value;
+
+        // rawurlencode key and value
+        $key = rawurlencode($key);
+        $value = rawurlencode($value);
     }
 
     /**
