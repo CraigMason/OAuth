@@ -65,6 +65,8 @@ class Client
         $this->_connector = $connector;
         $this->_request = $request;
         $this->_signature = $signature;
+
+        $this->_request->setParameter('oauth_version', '1.0');
     }
 
     /**
@@ -106,6 +108,18 @@ class Client
      */
     public function prepare()
     {
+        // Prepare the request
+        $this->_request->setParameters(array(
+            'oauth_nonce' => $this->_generateNonce(),
+            'oauth_timestamp' => $this->_generateTimestamp()
+        ));
+
+        // Generate the signature
+        $signature = $this->_signature->generateSignature();
+
+        // Add the signature to the request
+        $this->_request->setParameter('oauth_signature', $signature);
+
         $this->_connector->prepare($this->_request);
 
         $this->_prepared = true;
