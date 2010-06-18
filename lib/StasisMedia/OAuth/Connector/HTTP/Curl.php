@@ -30,11 +30,18 @@ class Curl implements Connector\ConnectorInterface
     private $_curlOptions = array();
 
     /**
+     * Headers to supply to the CURL handle
+     * @var array
+     */
+    private $_curlHeaders = array();
+
+    /**
      * The transmission method to use for oauth_ and protocol parameters
      * @var <type>
      */
     private $_transmissionMethod = self::TRANSMIT_AUTHORIZATION_HEADER;
 
+    /**
      * Request
      * @var Request\RequestInterface;
      */
@@ -80,6 +87,27 @@ class Curl implements Connector\ConnectorInterface
         }
     }
 
+    /**
+     * Sets the transmission method for transferring the protocol and other
+     * oauth_ parameters to the Provider
+     *
+     * @param string $method 
+     */
+    public function setTransmissionMethod($method)
+    {
+        switch($method)
+        {
+            case self::REQUEST_URI_QUERY:
+            case self::FORM_ENCODED_BODY:
+            case self::TRANSMIT_AUTHORIZATION_HEADER:
+                $this->_transmissionMethod = $method;
+                break;
+            default:
+                throw new Exception('Invalid parameter transmission method');
+                break;
+        }
+    }
+
     public function prepare(Request\RequestInterface $request)
     {
         $this->_request = $request;
@@ -97,12 +125,68 @@ class Curl implements Connector\ConnectorInterface
         // Set some mandatory options
         $options = array(
             \CURLOPT_URL            => $this->_request->getUrl(),
-            \CURLOPT_RETURNTRANSFER => true
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_HEADER         => true
         );
+        
+        // See if this should be a POST
+        if($this->_request->getRequestMethod() == 'POST')
+        {
+            $options[\CURLOPT_POST] = true;
+        }
 
         $this->setCurlOptions($options);
 
-        curl_setopt_array($this->_curlHandle, $options);
+        // Add the oauth parameters
+        $this->_addOAuthParameters();
+
+        // Add any headers to the request
+        if(count($this->_curlHeaders) > 0)
+        {
+            $this->setCurlOptions(array(
+                \CURLOPT_HTTPHEADER => $this->_curlHeaders
+            ));
+        }
+
+        // Finally apply all of the options
+        curl_setopt_array($this->_curlHandle, $this->_curlOptions);
+        //var_dump($this->_curlOptions);
+        //die();
+    }
+
+
+    private function _addOAuthParameters()
+    {
+        switch($this->_transmissionMethod)
+        {
+            case self::TRANSMIT_AUTHORIZATION_HEADER:
+                $this->addOAuthParametersAuthorizationHeader();
+                break;
+            default:
+                throw new Exception('Not implemented');
+                break;
+        }
+    }
+
+    /**
+     * Add the OAuth parameters as per
+     * http://tools.ietf.org/html/rfc5849#section-3.5.1
+     */
+    private function addOAuthParametersAuthorizationHeader()
+    {
+        $parameters = $this->_request->getOAuthParameters();
+        
+        $headerParts = array();
+
+        foreach($parameters as $key => $value)
+        {
+            $headerParts[] = rawurlencode($key)
+                             . '="' . rawurlencode($value) . '"';
+        }
+
+        $header = 'Authorization: OAuth ' . implode(', ', $headerParts);
+
+        $this->_curlHeaders[] = $header;
     }
 
     public function execute()
@@ -113,7 +197,7 @@ class Curl implements Connector\ConnectorInterface
         }
 
         $this->_response['body'] = curl_exec($this->_curlHandle);
-        $this->_response['headers'] = curl_getinfo($this->_curlHandle);
+        //$this->_response['headers'] = curl_getinfo($this->_curlHandle);
 
         $this->_executed = true;
     }
