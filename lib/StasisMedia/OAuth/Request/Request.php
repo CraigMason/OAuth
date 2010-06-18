@@ -162,6 +162,8 @@ class Request implements RequestInterface
                 $oauthParameters[$key] = $value;
             }
         }
+        
+        return $oauthParameters;
     }
 
     /**
