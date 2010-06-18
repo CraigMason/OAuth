@@ -2,7 +2,8 @@
 namespace StasisMedia\OAuth\Signature;
 
 use StasisMedia\OAuth\Request\RequestInterface;
-/*
+
+/**
  * OAuth 1.0 Signature Method Interface
  * http://tools.ietf.org/html/rfc5849#section-3.4
  *

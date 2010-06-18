@@ -1,10 +1,10 @@
 <?php
 namespace StasisMedia\OAuth\Request;
 
-/*
+/**
  * OAuth 1.0 request
  *
- * Base class will all default REQUIRED and OPTIONAL parameters
+ * Base class will set all default REQUIRED and OPTIONAL parameters
  * http://tools.ietf.org/html/rfc5849#section-3
  *
  * @author      Craig Mason <craig.mason@stasismedia.com>
@@ -33,7 +33,7 @@ class Request implements RequestInterface
 
     /**
      * Optional OAuth parameters for the request
-     * @var <type>
+     * @var array
      */
     private $_optionalOAuthParameters = array();
 
@@ -255,6 +255,51 @@ class Request implements RequestInterface
 
         // Ignore the query string and fragment
         return $baseStringURI;
+    }
+
+    /**
+     * Parses the query-string of a URI into an associative array. Duplicate
+     * keys will transform the parameter into an array
+     *
+     * @param string $parameters
+     */
+    public static function parseQueryParameters($queryString)
+    {
+        // If there is nothing to parse, return an empty array
+        if( isset($queryString) === false || $queryString === false) return array();
+
+        // Resulting parameters
+        $parameters = array();
+
+        // Split the key pairs with an ampersand
+        $pairs = explode('&', $queryString);
+
+        foreach($pairs as $pair)
+        {
+            $split = explode('=', $pair, 2);
+
+            // TODO: Can array keys be utf-8 strings?
+            $parameter = rawurldecode($split[0]);
+            // Value may be blank
+            $value = isset($split[1]) ? rawurldecode($split[1]) : '';
+
+            // If the key exists, it must be appended to the list
+            if(array_key_exists($parameter, $parameters))
+            {
+                if(is_scalar($parameters[$parameter]))
+                {
+                    $parameters[$parameter] = array($parameters[$parameter]);
+                }
+                $parameters[$parameter][] = $value;
+            }
+            // Paramater does not exist. Add it to the list normally
+            else
+            {
+                $parameters[$parameter] = $value;
+            }
+        }
+
+        return $parameters;
     }
 
 }

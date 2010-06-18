@@ -4,6 +4,7 @@ Namespace StasisMedia\OAuth\Signature;
 use StasisMedia\OAuth\Request\RequestInterface;
 
 require_once dirname(__FILE__) . '/../../../php-utf8/utf8.inc';
+
 /**
  * OAuth 1.0 signature base class
  * http://tools.ietf.org/html/rfc5849#section-3.4
@@ -30,6 +31,10 @@ abstract class Signature implements SignatureInterface
     }
 
 
+    /**
+     * Concatenates the request method, base string URI and parameters
+     * @return string The full base string
+     */
     protected function _getBaseString()
     {
         $parts = array();
@@ -46,16 +51,31 @@ abstract class Signature implements SignatureInterface
         return implode($parts, '&');
     }
 
+    /**
+     * Get the HTTP request method (GET, POST, PUT, DELETE or other) from the
+     * Request
+     *
+     * @return string
+     */
     private function _getBaseStringRequestMethod()
     {
         return strtoupper($this->_request->getRequestMethod());
     }
 
+    /**
+     * Get the base string URI from the Request
+     * @return String
+     */
     private function _getBaseStringURI()
     {
         return $this->_request->getBaseStringURI();
     }
 
+    /**
+     * Proxy method - return the normalized parameters.
+     *
+     * @return string
+     */
     private function _getNormalizedParameters()
     {
         return $this->_normalizeParameters($this->_request->getParameters());
@@ -63,7 +83,9 @@ abstract class Signature implements SignatureInterface
 
     /**
      * Normalizes the the parameters
-     * @param <type> $parameters
+     *
+     * @param array $parameters
+     * @return string
      */
     protected function _normalizeParameters($parameters)
     {
@@ -88,7 +110,7 @@ abstract class Signature implements SignatureInterface
     }
 
     /**
-     * Encodes a key/value pair, utf8
+     * Encodes a key/value pair with utf-8, followed by rawurlencode()
      *
      * @param string $value
      * @param string $key
@@ -107,8 +129,8 @@ abstract class Signature implements SignatureInterface
     /**
      * Detects whether a string is UTF-8. If not, we will attempt to
      *
-     * @param <type> $string
-     * @return <type>
+     * @param string $string
+     * @return string
      */
     private function _utf8Encode($string)
     {
@@ -157,7 +179,7 @@ abstract class Signature implements SignatureInterface
      * http://markmail.org/message/ppzg65eslngpov24
      * http://markmail.org/message/ppzg65eslngpov24
      *
-     * @param <type> $parameters
+     * @param array $parameters
      */
     private function _sortParameters($parameters)
     {
@@ -199,7 +221,7 @@ abstract class Signature implements SignatureInterface
     }
 
     /**
-     * Compare 2 UTF-8 strings by comparing positions in UTf-8 character table
+     * Compare 2 UTF-8 strings by comparing positions in UTF-8 character table
      * @param string $a UTF-8 encoded string
      * @param string $b UTF-8 encoded string
      * @return int Order of $a compared to $b
@@ -253,7 +275,7 @@ abstract class Signature implements SignatureInterface
 
     /**
      * Joins each key/value pair with '='
-     * 
+     *
      * @param array $parameters  key/value pairs
      */
     private function _joinParameters($parameters)
@@ -263,7 +285,7 @@ abstract class Signature implements SignatureInterface
         {
             $joined[] = $key . '=' . $value;
         }
-        
+
         return $joined;
     }
 

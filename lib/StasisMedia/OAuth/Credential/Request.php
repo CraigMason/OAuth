@@ -1,7 +1,7 @@
 <?php
 namespace StasisMedia\OAuth\Credential;
 
-/*
+/**
  * OAuth 1.0 Request credential
  *
  * Used temporarily when negotiating access with the Service Provider

@@ -3,7 +3,8 @@ namespace StasisMedia\OAuth\Connector\HTTP;
 
 use StasisMedia\OAuth\Connector;
 use StasisMedia\OAuth\Request;
-/*
+
+/**
  * OAuth 1.0 HTTP Curl connector
  *
  * CURL connector for communicating with a Service Provider using HTTP
@@ -37,7 +38,7 @@ class Curl implements Connector\ConnectorInterface
 
     /**
      * The transmission method to use for oauth_ and protocol parameters
-     * @var <type>
+     * @var string
      */
     private $_transmissionMethod = self::TRANSMIT_AUTHORIZATION_HEADER;
 
@@ -61,7 +62,7 @@ class Curl implements Connector\ConnectorInterface
 
     /**
      * The response from the Provider;
-     * @var <type>
+     * @var array
      */
     private $_response = array();
 
@@ -108,6 +109,11 @@ class Curl implements Connector\ConnectorInterface
         }
     }
 
+    /**
+     * Prepare the connector for execution
+     * 
+     * @param RequestInterface $request
+     */
     public function prepare(Request\RequestInterface $request)
     {
         $this->_request = $request;
@@ -130,6 +136,7 @@ class Curl implements Connector\ConnectorInterface
         );
         
         // See if this should be a POST
+        // TODO: Proper HTTP method processing
         if($this->_request->getRequestMethod() == 'POST')
         {
             $options[\CURLOPT_POST] = true;
@@ -139,6 +146,8 @@ class Curl implements Connector\ConnectorInterface
 
         // Add the oauth parameters
         $this->_addOAuthParameters();
+
+        // TODO: Add other parameters
 
         // Add any headers to the request
         if(count($this->_curlHeaders) > 0)
@@ -150,11 +159,11 @@ class Curl implements Connector\ConnectorInterface
 
         // Finally apply all of the options
         curl_setopt_array($this->_curlHandle, $this->_curlOptions);
-        //var_dump($this->_curlOptions);
-        //die();
     }
 
-
+    /**
+     * Add the 'oauth_' parameters, according to the transmission method
+     */
     private function _addOAuthParameters()
     {
         switch($this->_transmissionMethod)
