@@ -13,6 +13,9 @@ use StasisMedia\OAuth\Connector;
  * interfere with the parent application. Redirection is the responsibility
  * of the application.
  *
+ * urlencoding should be rfc3986 compliant. PHP 5.3 rawurlencode() is rfc3986
+ * compliant. Prior to 5.3, it was rfc1738 compliant.
+ *
  * @author      Craig Mason <craig.mason@stasismedia.com>
  * @package     OAuth
  */
