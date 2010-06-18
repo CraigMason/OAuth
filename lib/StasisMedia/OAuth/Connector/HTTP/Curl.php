@@ -189,6 +189,9 @@ class Curl implements Connector\ConnectorInterface
         $this->_curlHeaders[] = $header;
     }
 
+    /**
+     * Execute the curl handle
+     */
     public function execute()
     {
         if($this->_prepared === false)
@@ -196,12 +199,47 @@ class Curl implements Connector\ConnectorInterface
             throw new Exception('prepare() must be called before execute()');
         }
 
-        $this->_response['body'] = curl_exec($this->_curlHandle);
-        //$this->_response['headers'] = curl_getinfo($this->_curlHandle);
+        $response = curl_exec($this->_curlHandle);
+
+        $responseParts = explode("\r\n\r\n", $response, 2);
+        $this->_response['header'] = $responseParts[0];
+        $this->_response['body'] =  $responseParts[1];
+        $this->_response['headers'] = $this->_parseHeader($responseParts[0]);
 
         $this->_executed = true;
     }
 
+    /**
+     * Parses a HTTP header into an assoc array. We use this to prevent
+     * dependence on PECL HTTP
+     *
+     * From http://www.php.net/manual/en/function.http-parse-headers.php#77241
+     *
+     * @param string $header
+     * @return array Associative array of all headers
+     */
+    function _parseHeader($header)
+    {
+        $retVal = array();
+        $fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
+        foreach( $fields as $field ) {
+            if( preg_match('/([^:]+): (.+)/m', $field, $match) ) {
+                $match[1] = preg_replace('/(?<=^|[\x09\x20\x2D])./e', 'strtoupper("\0")', strtolower(trim($match[1])));
+                if( isset($retVal[$match[1]]) ) {
+                    $retVal[$match[1]] = array($retVal[$match[1]], $match[2]);
+                } else {
+                    $retVal[$match[1]] = trim($match[2]);
+                }
+            }
+        }
+        return $retVal;
+    }
+
+    /**
+     * Get the response from a CURL request
+     * 
+     * @return array The response
+     */
     public function getResponse()
     {
         return $this->_response;
