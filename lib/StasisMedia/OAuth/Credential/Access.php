@@ -1,7 +1,7 @@
 <?php
 namespace StasisMedia\OAuth\Credential;
 
-/*
+/**
  * OAuth 1.0 Access credential
  *
  * @author      Craig Mason <craig.mason@stasismedia.com>

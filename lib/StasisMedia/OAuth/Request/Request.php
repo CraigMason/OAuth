@@ -1,10 +1,10 @@
 <?php
 namespace StasisMedia\OAuth\Request;
 
-/*
+/**
  * OAuth 1.0 request
  *
- * Base class will all default REQUIRED and OPTIONAL parameters
+ * Base class will set all default REQUIRED and OPTIONAL parameters
  * http://tools.ietf.org/html/rfc5849#section-3
  *
  * @author      Craig Mason <craig.mason@stasismedia.com>
@@ -33,7 +33,7 @@ class Request implements RequestInterface
 
     /**
      * Optional OAuth parameters for the request
-     * @var <type>
+     * @var array
      */
     private $_optionalOAuthParameters = array();
 

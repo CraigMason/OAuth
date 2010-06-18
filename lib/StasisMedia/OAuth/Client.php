@@ -2,12 +2,13 @@
 namespace StasisMedia\OAuth;
 
 use StasisMedia\OAuth\Connector;
-/* 
+
+/**
  * OAuth 1.0 client - rfc5849
  * http://tools.ietf.org/html/rfc5849
  *
  * Uses the terminology as specified in rfc5849
- * 
+ *
  * This library will not initiate any redirection, echo output or otherwise
  * interfere with the parent application. Redirection is the responsibility
  * of the application.
@@ -81,7 +82,7 @@ class Client
 
     /**
      * Returns the current unix timestamp
-     * @return <type>
+     * @return int Unix timestamp
      */
     private function _generateTimestamp()
     {
@@ -120,13 +121,18 @@ class Client
         // Add the signature to the request
         $this->_request->setParameter('oauth_signature', $signature);
 
+        // Call the prepare method on the request
         $this->_connector->prepare($this->_request);
 
         $this->_prepared = true;
     }
 
+    /**
+     * Execute the request. Will call prepare() if not already done so.
+     */
     public function execute()
     {
+        // If we have not yet prepared, do so
         if($this->_prepared === false) $this->prepare();
 
         // Execute
@@ -135,6 +141,11 @@ class Client
         $this->_executed = true;
     }
 
+    /**
+     * Return the full response array from the connector
+     *
+     * @return Array The response array (header, headers, body);
+     */
     public function getResponse()
     {
         return $this->_connector->getResponse();
