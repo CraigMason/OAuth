@@ -48,9 +48,11 @@ class TemporaryCredentials extends Request implements RequestInterface
     {
         $this->_consumerCredentials = $consumerCredentials;
 
-        $this->setParameters(array(
-            'oauth_consumer_key' => $this->_consumerCredentials->getKey()
-        ));
+        
+        $this->setOAuthParameter(
+            'oauth_consumer_key',
+            $this->_consumerCredentials->getKey()
+        );
     }
 
     /**
@@ -61,7 +63,10 @@ class TemporaryCredentials extends Request implements RequestInterface
     public function setCallbackUrl($callbackUrl)
     {
         $this->_callbackUrl = $callbackUrl;
-        
-        $this->setParameter('oauth_callback', $this->_callbackUrl);
+
+        $this->setOAuthParameter(
+            'oauth_callback',
+            $this->_callbackUrl
+        );
     }
 }
