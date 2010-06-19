@@ -2,9 +2,20 @@
 namespace StasisMedia\OAuth\Request;
 
 /**
- * OAuth 1.0 request
+ * OAuth 1.0 Request
  *
- * Base class will set all default REQUIRED and OPTIONAL parameters
+ * Models the components of a HTTP message that are used when sending an OAuth
+ * signed request. Whilst this class models a number of elements of a HTTP
+ * message, it is only concerned with holding parameters, headers and other
+ * entities for the purpose of generating a base string.
+ *
+ * StasisMedia\OAuth\Client can create a CURL-based HTTP request from this
+ * model.
+ *
+ * The term 'Request' is used, because it is representative of both a 'HTTP
+ * Message' and a 'OAuth Request'.
+ *
+ * Will set all default REQUIRED and OPTIONAL parameters according to
  * http://tools.ietf.org/html/rfc5849#section-3
  *
  * @author      Craig Mason <craig.mason@stasismedia.com>
