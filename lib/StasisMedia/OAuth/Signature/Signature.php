@@ -118,12 +118,16 @@ abstract class Signature implements SignatureInterface
     private function _encodeKeyValue(&$value, &$key)
     {
         // Only encode strings
-        $key = is_string($key) ? $this->_utf8Encode($key) : $key;
-        $value = is_string($value) ? $this->_utf8Encode($value) : $value;
+        $key = is_string($key) ?: rawurlencode($this->_utf8Encode($key));
 
-        // rawurlencode key and value
-        $key = rawurlencode($key);
-        $value = rawurlencode($value);
+        if(is_array($value))
+        {
+            array_walk($value, array($this, '_encodeKeyValue'));
+        }
+        elseif(is_string($value))
+        {
+            $value = urlencode($this->_utf8Encode($value));
+        }
     }
 
     /**
@@ -164,17 +168,10 @@ abstract class Signature implements SignatureInterface
     /**
      * Sort the parameters by key, then value if keys match.
      *
-     * The strings should be sorted using 'byte value ordering'. Namely, the
-     * position in the UTF-8 table where the character exists.
-     *
-     * http://tools.ietf.org/html/rfc3629#section-1
-     *
-     *   The byte-value lexicographic sorting order of UTF-8 strings is the
-     *   same as if ordered by character numbers.  Of course this is of
-     *   limited interest since a sort order based on character numbers is
-     *   almost never culturally valid.
-     *
-     * Also, further comments from Eran Hammer-Lahav
+     * The strings should be sorted using 'byte value ordering'. However,
+     * unlike previously thought, by urlencoding the UTF-8 values, we are
+     * only working with ASCII characters. Thus, we can use the regular
+     * 'strcmp' function in PHP.
      *
      * http://markmail.org/message/ppzg65eslngpov24
      * http://markmail.org/message/ppzg65eslngpov24
@@ -183,94 +180,15 @@ abstract class Signature implements SignatureInterface
      */
     private function _sortParameters($parameters)
     {
-        // Break the key/value pairs down into a data array for comparison
-        $data = array();
-        foreach($parameters as $key => $value)
-        {
-            $data[] = array('key' => $key, 'value' => $value);
-        }
+        // Sort based on keys
+        uksort($parameters, 'strcmp');
 
-        usort($data, array($this, '_utf8Sort'));
-
-        // Reassemble key/value pairs
-        $parameters = array();
-        foreach($data as $row)
-        {
-            $parameters[$row['key']] = $row['value'];
-        }
+        // Sort based on values
+        array_walk($parameters, function(&$value){
+            if(is_array($value)) usort($value, 'strcmp');
+        });
 
         return $parameters;
-
-    }
-
-    /**
-     * Attempts to _utf8Compare by 'key', then 'value'
-     *
-     * @param array $a First key/value pair
-     * @param array $b Second key/value pair
-     * @return int Sorting order
-     */
-    private function _utf8Sort($a, $b)
-    {
-        if($a['key'] !== $b['key'])
-        {
-            return $this->_utf8Compare($a['key'], $b['key']);
-        } else {
-            return $this->_utf8Compare($a['value'], $b['value']);
-        }
-    }
-
-    /**
-     * Compare 2 UTF-8 strings by comparing positions in UTF-8 character table
-     * @param string $a UTF-8 encoded string
-     * @param string $b UTF-8 encoded string
-     * @return int Order of $a compared to $b
-     */
-    private function _utf8Compare($a, $b)
-    {
-        $aOrd = utf8ToUnicode($a);
-        $bOrd = utf8ToUnicode($b);
-
-        $i = 0;
-        $max = max(count($aOrd), count($bOrd));
-        $sort = 0;
-
-        do
-        {
-            // If both values exist
-            if(array_key_exists($i, $aOrd) && array_key_exists($i, $aOrd))
-            {
-                // If both the same, continue
-                if($aOrd[$i] == $bOrd[$i])
-                {
-                    continue;
-                }
-
-                // Which one is higher?
-                elseif($aOrd[$i] < $bOrd[$i])
-                {
-                    $sort = -1;
-                }
-                else
-                {
-                    $sort = 1;
-                }
-
-            }
-            // If a exists, b is higher
-            elseif(array_key_exists($i, $aOrd))
-            {
-                $sort = 1;
-            }
-            // If b exists, a is higher
-            else
-            {
-                $sort = -1;
-            }
-        }
-        while ($sort === 0 && $i++ < $max - 1);
-
-        return $sort;
     }
 
     /**
