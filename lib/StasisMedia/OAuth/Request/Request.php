@@ -163,12 +163,43 @@ class Request implements RequestInterface
         $this->_parameters = array_merge($this->_parameters, $parameters);
     }
 
+    /**
+     * Collects the parameters from a number of collections, according to
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
+     *
+     * * The query component of the URI
+     * * The OAuth 'Authorization' header field
+     * * The entity body, only if:
+     *   * It is single part
+     *   * It is 'application/x-www-form-urlencoded'
+     *   * The 'Content-Type' header is 'application/x-www-form-urlencoded'
+     *
+     * Should never return an oauth_signature, as we do not allow it to be
+     * set within this class.
+     *
+     * @return array
+     */
     public function getParameters()
     {
+        // 1. The query component
+        //$this->_getQueryParameters();
+
+        // 2. The Authorization header
+        //$this->_getAuthorizationHeaderParameters();
+
+        // 3. The entity-body
+        //$this->_getEntityBodyParameters();
     }
 
+    /**
+     * Return only the parameters prefixed with 'oauth'
+     *
+     * @return array
+     */
     public function getOAuthParameters()
     {
+        // TODO: Rewrite to utilise getParameters()
+        /*
         $oauthParameters = array();
         foreach($this->_parameters as $key => $value)
         {
@@ -178,9 +209,21 @@ class Request implements RequestInterface
                 $oauthParameters[$key] = $value;
             }
         }
-        
+
         return $oauthParameters;
+        */
     }
+
+    /**
+     * Get the key/value pairs of parameters supplied in the query string
+     * of the URL
+     */
+    private function _getQueryParameters()
+    {
+        $queryString = $this->_urlComponents['query'];
+        return self::parseQueryParameters($queryString);
+    }
+
 
     /**
      * Set the endpoint of the Request
