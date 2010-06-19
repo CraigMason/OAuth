@@ -360,6 +360,32 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get the entity-body parameters, only if:
+     *   * It is single part
+     *   * It is 'application/x-www-form-urlencoded'
+     *   * The 'Content-Type' header is 'application/x-www-form-urlencoded'
+     *
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
+     * 
+     * @return array rawurlencoded key/value pairs
+     */
+    private function _getEntityBodyParameters()
+    {
+        // If there is no entity body, return an empty array
+        if(empty($this->_entityBody) === true) return array();
+
+        /*
+         * If the 'Content-Type' header is not 'application/x-www-form-urlencoded'
+         * return an empty array
+         */
+        if(array_key_exists('Content-Type', $this->_headers) === false) return array();
+        if($this->_headers['Content-Type'] !== 'application/x-www-form-urlencoded') return array();
+
+        // If we are here, the header is intact
+        return self::parseQueryParameters($this->_entityBody);
+    }
+
+    /**
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
      */
