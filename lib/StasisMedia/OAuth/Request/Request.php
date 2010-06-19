@@ -49,10 +49,16 @@ class Request implements RequestInterface
     private $_optionalOAuthParameters = array();
 
     /**
-     * Key/Value pairs of parameters
-     * @var array
+     * Array of HTTP headers
+     * @var array;
      */
-    private $_parameters = array();
+    private $_headers = array();
+
+    /**
+     * The entity body of the HTPT message
+     * @var string
+     */
+    private $_entityBody;
 
     /**
      * The HTTP Request method
@@ -159,7 +165,6 @@ class Request implements RequestInterface
 
     public function getParameters()
     {
-        return $this->_parameters;
     }
 
     public function getOAuthParameters()
@@ -219,22 +224,60 @@ class Request implements RequestInterface
     }
 
     /**
+     * Set the entity body. Note: the paramaters will not be returned from the
+     * entity body if the 'Content-Type' header is set to 'application/x-www-
+     * form-urlencoded'.
+     *
+     * This function will generally be called from $this->setPostData();
+     *
+     * @see setPostData
+     * @see _getParameters
+     *
+     * @param <type> $body
+     * @param <type> $contentType
+     */
+    public function setEntityBody($entityBody, $contentType = null)
+    {
+        $this->_entityBody = $entityBody;
+
+        if(empty($contentType) === false)
+        {
+            $this->_headers['Content-Type'] = $contentType;
+        }
+
+    }
+
+    /**
+     * Set the entity-body to a query string derived from the parameters,
+     * and set the 'Content-Type' header to 'application/x-www-form-urlencoded'
+     *
+     * @param array $parameters
+     */
+    public function setPostParameters($parameters)
+    {
+        $this->setEntityBody(
+                self::buildQueryString($parameters),
+                'application/x-www-form-urlencoded'
+        );
+    }
+
+    /**
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
      */
     public function getBaseStringURI()
     {
         $parts = $this->_urlComponents;
-        
+
         // http://host
         $baseStringURI =
             strtolower($parts['scheme'])
             . '://'
             . strtolower($parts['host']);
-        
+
         /*
          * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
-         * 
+         *
          * The port MUST be included if it is not the default port for the
          * scheme, and MUST be excluded if it is the default.  Specifically,
          * the port MUST be excluded when making an HTTP request [RFC2616]
@@ -243,7 +286,7 @@ class Request implements RequestInterface
          */
         $scheme = $parts['scheme'];
         $port = array_key_exists('port', $parts) ? $parts['port'] : '';
-        
+
         if( empty($port) === false)
         {
            switch($port)
