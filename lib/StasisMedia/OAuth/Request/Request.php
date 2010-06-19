@@ -248,7 +248,7 @@ class Request implements RequestInterface
      * @param string $key
      * @param array|string $value
      */
-    private function _decodeParameters(&$key, &$value)
+    private function _decodeParameters(&$value, &$key)
     {
         $key = rawurldecode($key);
 
