@@ -12,19 +12,26 @@ namespace StasisMedia\OAuth\Parameter;
  */
 class Parameter implements \Iterator
 {
+    /**
+     * The key is actually of type Value, as it must be percent encoded too
+     * @var Value
+     */
     private $_key;
 
+    /**
+     * Array of Value objects
+     * @var Array
+     */
     private $_values = array();
 
     private $_position = 0;
 
-    private $_encoded = false;
 
     public function __construct($key, $values)
     {
         $this->_position = 0;
 
-        $this->_key = $key;
+        $this->_key = new Value($key);
         $this->addValues((array) $values);
     }
 
@@ -37,15 +44,23 @@ class Parameter implements \Iterator
     {
        foreach($values as $value)
        {
-           $this->_values[] = $value;
+           $this->_values[] = new Value($value);
        }
     }
 
+    /**
+     * Get the current Value object
+     * @return Value
+     */
     function current()
     {
         return $this->_values[$this->_position];
     }
 
+    /**
+     * Just a numeric index, only used when iterating
+     * @return <type>
+     */
     function key()
     {
         return $this->_position;
@@ -66,12 +81,19 @@ class Parameter implements \Iterator
         return isset($this->_values[$this->_position]);
     }
 
-    public function getJoined()
+    /**
+     * Returns the normalised string for this parameter. This differs from
+     * a traditional 'join', as text values will have been converted into UTF-8
+     * first, which may not be expected.
+     */
+    public function getNormalized()
     {        
         $pairs = array();
-        foreach($encoded as $value)
+        foreach($this->_values as $value)
         {
-            $pairs[] = rawurlencode($this->_key) . '=' . rawurlencode($value);
+            /* @var $value Value */
+
+            $pairs[] = $this->_key->getPercentEncoded() . '=' . $value->getPercentEncoded();
         }
 
         return implode('&', $pairs);
