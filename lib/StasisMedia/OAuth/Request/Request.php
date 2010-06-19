@@ -1,6 +1,8 @@
 <?php
 namespace StasisMedia\OAuth\Request;
 
+use StasisMedia\OAuth\Util;
+
 /**
  * OAuth 1.0 Request
  *
@@ -170,7 +172,7 @@ class Request implements RequestInterface
      */
     public function getParameters()
     {
-        return $this->_combineParameters(
+        return Util\Parameter::combineParameters(
             // 1. The query component
             $this->_getQueryParameters(),
             // 2. The Authorization header
@@ -180,54 +182,6 @@ class Request implements RequestInterface
             // 4. Other OAuth parameters we generate or add
             $this->getOAuthParameters()
         );
-    }
-
-    /**
-     * Combine a number of key/value based parameter arrays
-     *
-     * @return array combined array
-     */
-    private function _combineParameters()
-    {
-        // Get all of the arrays supplied to the argument
-        $parameterArrays = func_get_args();
-
-        $parameters = array();
-
-        // Loop through parameterArray
-        foreach($parameterArrays as $parameterArray)
-        {
-            // Loop through each Parameter
-            foreach($parameterArray as $key => $value)
-            {
-                // If the key exists, merge
-                if(array_key_exists($key, $parameters))
-                {
-                    // If scalar, convert to array first
-                    if(is_scalar($parameters[$key]))
-                    {
-                        $parameters[$key] = array($parameters[$key]);
-                    }
-
-                    // If the value is also an array, merge
-                    if(is_array($value))
-                    {
-                        $parameters[$key] = array_merge($parameters[$key], $value);
-                    } else {
-                        $parameters[$key][] = $value;
-                    }
-                    
-
-                }
-                // Paramater does not yet exist. Add scalar
-                else
-                {
-                    $parameters[$key] = $value;
-                }
-            }
-        }
-
-        return $parameters;
     }
 
     /**
@@ -358,7 +312,7 @@ class Request implements RequestInterface
         if($merge === true)
         {
             // Combine the incoming parameters with the existing post parameters
-            $postParameters = $this->_combineParameters(
+            $postParameters = Util\Parameter::combineParameters(
                 $this->getPostParameters(),
                 $parameters
             );
