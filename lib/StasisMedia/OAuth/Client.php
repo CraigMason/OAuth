@@ -124,6 +124,9 @@ class Client
         // Add the signature to the request
         $this->_request->setOAuthParameter('oauth_signature', $signature);
 
+        // Add any post parameters from the Request to the Connector
+        $this->_connector->setPostParameters($this->_request->getPostParameters());
+
         // Call the prepare method on the request
         $this->_connector->prepare($this->_request);
 

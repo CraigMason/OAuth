@@ -25,8 +25,12 @@ interface RequestInterface
 
     public function setOAuthParameter($parameter, $value);
     public function setOAuthParameters(array $parameters);
-    public function getParameters();
     public function getOAuthParameters();
+
+    public function setPostParameters(array $parameters, $merge = true);
+    public function getPostParameters();
+
+    public function getParameters();
 
     public function hasRequiredParameters();
     public function getMissingParameters();

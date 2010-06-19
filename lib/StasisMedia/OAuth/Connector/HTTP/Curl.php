@@ -98,6 +98,12 @@ class Curl implements Connector\ConnectorInterface
         }
     }
 
+    /**
+     * Set the post parameters for the request
+     *
+     * @param array $postParameters
+     * @param bool $merge
+     */
     public function setPostParameters(array $postParameters, $merge=true)
     {
         if($merge === true)
@@ -158,20 +164,19 @@ class Curl implements Connector\ConnectorInterface
             \CURLOPT_HEADER         => true
         );
         
+        // Add the oauth parameters
+        $this->_addOAuthParameters();
+
         // See if this should be a POST
-        // TODO: Proper HTTP method processing
         if($this->_request->getRequestMethod() == 'POST')
         {
             $options[\CURLOPT_POST] = true;
+            $options[\CURLOPT_POSTFIELDS] = Utility\Parameter::buildQueryString($this->_postParameters);
         }
 
         $this->setCurlOptions($options);
 
-        // Add the oauth parameters
-        $this->_addOAuthParameters();
-
-        // TODO: Add other parameters
-
+        
         // Add any headers to the request
         if(count($this->_curlHeaders) > 0)
         {

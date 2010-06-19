@@ -307,7 +307,7 @@ class Request implements RequestInterface
      * @param array $parameters
      * @param bool Wether the supplied parameters should be merged with existing
      */
-    public function setPostParameters($parameters, $merge = true)
+    public function setPostParameters(array $parameters, $merge = true)
     {
         if($merge === true)
         {
