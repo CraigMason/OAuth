@@ -355,13 +355,33 @@ class Request implements RequestInterface
      * and set the 'Content-Type' header to 'application/x-www-form-urlencoded'
      *
      * @param array $parameters
+     * @param bool Wether the supplied parameters should be merged with existing
      */
-    public function setPostParameters($parameters)
+    public function setPostParameters($parameters, $merge = true)
     {
+        if($merge === true)
+        {
+            // Combine the incoming parameters with the existing post parameters
+            $postParameters = $this->_combineParameters(
+                $this->getPostParameters(),
+                $parameters
+            );
+        } else {
+            $postParameters = $parameters;
+        }
+
         $this->setEntityBody(
-                self::buildQueryString($parameters),
-                'application/x-www-form-urlencoded'
+            self::buildQueryString($postParameters),
+            'application/x-www-form-urlencoded'
         );
+    }
+
+    /**
+     * Returns the parameters currently in the entity body as a post request
+     */
+    public function getPostParameters()
+    {
+        return $this->_getEntityBodyParameters();
     }
 
     /**
