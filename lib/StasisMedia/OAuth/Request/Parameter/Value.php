@@ -1,6 +1,8 @@
 <?php
 namespace StasisMedia\OAuth\Parameter;
 
+use StasisMedia\OAuth\Exception;
+
 /**
  * HTTP Parameter Value
  *
@@ -29,7 +31,7 @@ class Value
     {
         if(!is_scalar($value))
         {
-            throw new Exception(sprintf('Value must be scalar. %s supplied',  gettype($value)));
+            throw new \Exception(sprintf('Value must be scalar. %s supplied',  gettype($value)));
         }
         $this->_value = $value;
         $this->_percentEncoded = null;
