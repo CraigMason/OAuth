@@ -305,6 +305,22 @@ class Request implements RequestInterface
     }
 
     /**
+     * Set the Authorization header to auth-scheme 'OAuth'
+     * @param <type> $parameters
+     */
+    public function setOAuthAuthorizationHeader($parameters)
+    {
+        $pairs = array();
+        foreach($parameters as $key => $value)
+        {
+            $pairs[] = rawurlencode($key) . '="' . rawurlencode($value) . '"';
+        }
+
+        // Set the header
+        $this->_headers['Authorization'] = 'OAuth ' . implode(',', $pairs);
+    }
+
+    /**
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
      */
