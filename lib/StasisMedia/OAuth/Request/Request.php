@@ -1,7 +1,7 @@
 <?php
 namespace StasisMedia\OAuth\Request;
 
-use StasisMedia\OAuth\Util;
+use StasisMedia\OAuth\Utility;
 
 /**
  * OAuth 1.0 Request
@@ -172,7 +172,7 @@ class Request implements RequestInterface
      */
     public function getParameters()
     {
-        return Util\Parameter::combineParameters(
+        return Utility\Parameter::combineParameters(
             // 1. The query component
             $this->_getQueryParameters(),
             // 2. The Authorization header
@@ -312,7 +312,7 @@ class Request implements RequestInterface
         if($merge === true)
         {
             // Combine the incoming parameters with the existing post parameters
-            $postParameters = Util\Parameter::combineParameters(
+            $postParameters = Utility\Parameter::combineParameters(
                 $this->getPostParameters(),
                 $parameters
             );

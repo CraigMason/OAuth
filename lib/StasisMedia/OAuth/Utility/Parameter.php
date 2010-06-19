@@ -1,5 +1,5 @@
 <?php
-namespace StasisMedia\OAuth\Util;
+namespace StasisMedia\OAuth\Utility;
 
 /**
  * Basic parameter helper

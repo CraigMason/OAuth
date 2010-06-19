@@ -3,7 +3,7 @@ namespace StasisMedia\OAuth\Connector\HTTP;
 
 use StasisMedia\OAuth\Connector;
 use StasisMedia\OAuth\Request;
-use StasisMedia\OAuth\Util;
+use StasisMedia\OAuth\Utility;
 
 /**
  * OAuth 1.0 HTTP Curl connector
@@ -102,7 +102,7 @@ class Curl implements Connector\ConnectorInterface
     {
         if($merge === true)
         {
-            $this->_postParameters = Util\Parameter::combineParameters(
+            $this->_postParameters = Utility\Parameter::combineParameters(
                     $postParameters,
                     $this->_postParameters
             );
