@@ -221,7 +221,14 @@ class Request implements RequestInterface
                         $parameters[$key] = array($parameters[$key]);
                     }
 
-                    $parameters[$key][] = $value;
+                    // If the value is also an array, merge
+                    if(is_array($value))
+                    {
+                        $parameters[$key] = array_merge($parameters[$key], $value);
+                    } else {
+                        $parameters[$key][] = $value;
+                    }
+                    
 
                 }
                 // Paramater does not yet exist. Add scalar
