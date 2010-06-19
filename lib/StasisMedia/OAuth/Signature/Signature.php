@@ -24,7 +24,7 @@ abstract class Signature implements SignatureInterface
     {
         $this->_request = $request;
 
-        $this->_request->setParameter(
+        $this->_request->setOAuthParameter(
                 'oauth_signature_method',
                 $this->getSignatureMethod()
         );
@@ -201,7 +201,18 @@ abstract class Signature implements SignatureInterface
         $joined = array();
         foreach($parameters as $key => $value)
         {
-            $joined[] = $key . '=' . $value;
+            if(is_array($value) == false)
+            {
+                $joined[] = $key . '=' . $value;
+            }
+            else
+            {
+                foreach($value as $duplicate)
+                {
+                    $joined[] = $key . '=' . $duplicate;
+                }
+            }
+            
         }
 
         return $joined;

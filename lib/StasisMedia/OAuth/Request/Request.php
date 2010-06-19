@@ -146,27 +146,7 @@ class Request implements RequestInterface
 
     public function getMissingParameters()
     {
-        return array_diff($this->_requiredOAuthParameters, array_keys($this->_parameters));
-    }
-
-    /**
-     * Adds the parameter and value to this request's parameters
-     *
-     * @param string $parameter
-     * @param string $value
-     */
-    public function setParameter($parameter, $value)
-    {
-        $this->setParameters(array($parameter => $value));
-    }
-
-    /**
-     * Sets an array of parameters
-     * @param array $parameters
-     */
-    public function setParameters($parameters)
-    {
-        $this->_parameters = array_merge($this->_parameters, $parameters);
+        return array_diff($this->_requiredOAuthParameters, array_keys($this->getParameters()));
     }
 
     /**
@@ -198,7 +178,7 @@ class Request implements RequestInterface
             // 3. The entity-body
             $this->_getEntityBodyParameters(),
             // 4. Other OAuth parameters we generate or add
-            $this->_getOAuthParameters()
+            $this->getOAuthParameters()
         );
     }
 
@@ -288,7 +268,7 @@ class Request implements RequestInterface
      */
     public function setOAuthParameters(array $parameters)
     {
-        array_merge($this->_oauthParameters, $parameters);
+        $this->_oauthParameters = array_merge($this->_oauthParameters, $parameters);
     }
 
     /**

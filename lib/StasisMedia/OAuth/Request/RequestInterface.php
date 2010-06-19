@@ -23,8 +23,8 @@ interface RequestInterface
     public function setUrl($url);
     public function getUrl();
 
-    public function setParameter($parameter, $value);
-    public function setParameters($parameters);
+    public function setOAuthParameter($parameter, $value);
+    public function setOAuthParameters(array $parameters);
     public function getParameters();
     public function getOAuthParameters();
 
