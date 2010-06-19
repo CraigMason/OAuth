@@ -467,11 +467,7 @@ class Request implements RequestInterface
             // Do NOT include the 'realm' parameter
             if($pair[0] === 'realm') continue;
 
-            // Do not decode them
-            $key = $pair[0];
-            $value = trim($pair[1], '"');
-
-            $parameters[$key] = $value;
+            $parameters[$pair[0]] = trim($pair[1], '"');
         }
 
         // rawurldecode
