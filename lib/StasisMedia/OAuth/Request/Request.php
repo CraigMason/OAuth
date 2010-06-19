@@ -78,6 +78,12 @@ class Request implements RequestInterface
      */
     private $_urlComponents;
 
+
+    /**
+     * The oauth parameters that do not exist elsewhere in the request
+     */
+    private $_oauthParameters = array();
+
     /**
      * Adds the required and optional parameters for all requests
      */
@@ -190,7 +196,9 @@ class Request implements RequestInterface
             // 2. The Authorization header
             $this->_getAuthorizationHeaderParameters(),
             // 3. The entity-body
-            $this->_getEntityBodyParameters()
+            $this->_getEntityBodyParameters(),
+            // 4. Other OAuth parameters we generate or add
+            $this->_getOAuthParameters()
         );
     }
 
@@ -263,26 +271,34 @@ class Request implements RequestInterface
     }
 
     /**
-     * Return only the parameters prefixed with 'oauth'
+     * Set a single oauth_ parameter
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function setOAuthParameter($key, $value)
+    {
+        $this->setOAuthParameters(array($key => $value));
+    }
+
+    /**
+     * Set an array of oauth_ parameters
+     *
+     * @param array $parameters
+     */
+    public function setOAuthParameters(array $parameters)
+    {
+        array_merge($this->_oauthParameters, $parameters);
+    }
+
+    /**
+     * Return the oauth parameters
      *
      * @return array
      */
     public function getOAuthParameters()
     {
-        // TODO: Rewrite to utilise getParameters()
-        /*
-        $oauthParameters = array();
-        foreach($this->_parameters as $key => $value)
-        {
-            // Identical to 0, begins with
-            if(strpos($key, 'oauth_') === 0)
-            {
-                $oauthParameters[$key] = $value;
-            }
-        }
-
-        return $oauthParameters;
-        */
+        return $this->_oauthParameters;
     }
 
     /**
