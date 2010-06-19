@@ -217,11 +217,15 @@ class Request implements RequestInterface
     /**
      * Get the key/value pairs of parameters supplied in the query string
      * of the URL
+     *
+     * @return array rawurlencoded key/value pairs
      */
     private function _getQueryParameters()
     {
         $queryString = $this->_urlComponents['query'];
+        
         return self::parseQueryParameters($queryString);
+
     }
 
 
@@ -352,8 +356,12 @@ class Request implements RequestInterface
 
             // Do NOT include the 'realm' parameter
             if($pair[0] === 'realm') continue;
-            
-            $parameters[$pair[0]] = trim($pair[1], '"');
+
+            // Do not decode them
+            $key = $pair[0];
+            $value = trim($pair[1], '"');
+
+            $parameters[$key] = $value;
         }
 
         return $parameters;
