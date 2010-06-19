@@ -2,9 +2,6 @@
 Namespace StasisMedia\OAuth\Signature;
 
 use StasisMedia\OAuth\Request\RequestInterface;
-
-require_once dirname(__FILE__) . '/../../../php-utf8/utf8.inc';
-
 /**
  * OAuth 1.0 signature base class
  * http://tools.ietf.org/html/rfc5849#section-3.4
