@@ -177,6 +177,9 @@ class Request implements RequestInterface
      * Should never return an oauth_signature, as we do not allow it to be
      * set within this class.
      *
+     * Parameters should all be decoded, according to
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3
+     *
      * @return array
      */
     public function getParameters()
@@ -233,6 +236,26 @@ class Request implements RequestInterface
     }
 
     /**
+     * Recursively rawurldecode parameters
+     * 
+     * @param string $key
+     * @param array|string $value
+     */
+    private function _decodeParameters(&$key, &$value)
+    {
+        $key = rawurldecode($key);
+
+        if(is_array($value))
+        {
+            array_walk($value, array($this, '_decodeParameters'));
+        }
+        else
+        {
+            $value = rawurldecode($value);
+        }
+    }
+
+    /**
      * Return only the parameters prefixed with 'oauth'
      *
      * @return array
@@ -254,21 +277,6 @@ class Request implements RequestInterface
         return $oauthParameters;
         */
     }
-
-    /**
-     * Get the key/value pairs of parameters supplied in the query string
-     * of the URL
-     *
-     * @return array rawurlencoded key/value pairs
-     */
-    private function _getQueryParameters()
-    {
-        $queryString = $this->_urlComponents['query'];
-
-        return self::parseQueryParameters($queryString);
-
-    }
-
 
     /**
      * Set the endpoint of the Request
@@ -373,6 +381,24 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get the key/value pairs of parameters supplied in the query string
+     * of the URL
+     *
+     * @return array rawurldecoded key/value pairs
+     */
+    private function _getQueryParameters()
+    {
+        $queryString = $this->_urlComponents['query'];
+
+        $parameters = self::parseQueryParameters($queryString);
+
+        // rawurldecode
+        array_walk($parameters, array($this, '_decodeParameters'));
+
+        return $parameters;
+    }
+
+    /**
      * Get the parameters from the Authorization header. We do not provide
      * an interface to set a different scheme, so we immediately parse
      * the parameters.
@@ -405,6 +431,9 @@ class Request implements RequestInterface
             $parameters[$key] = $value;
         }
 
+        // rawurldecode
+        array_walk($parameters, array($this, '_decodeParameters'));
+
         return $parameters;
     }
 
@@ -431,7 +460,12 @@ class Request implements RequestInterface
         if($this->_headers['Content-Type'] !== 'application/x-www-form-urlencoded') return array();
 
         // If we are here, the header is intact
-        return self::parseQueryParameters($this->_entityBody);
+        $parameters = self::parseQueryParameters($this->_entityBody);
+
+        // rawurldecode
+        array_walk($parameters, array($this, '_decodeParameters'));
+
+        return $parameters;
     }
 
     /**
