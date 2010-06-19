@@ -3,6 +3,7 @@ namespace StasisMedia\OAuth\Connector\HTTP;
 
 use StasisMedia\OAuth\Connector;
 use StasisMedia\OAuth\Request;
+use StasisMedia\OAuth\Utility;
 
 /**
  * OAuth 1.0 HTTP Curl connector
@@ -42,6 +43,13 @@ class Curl implements Connector\ConnectorInterface
      */
     private $_transmissionMethod = self::TRANSMIT_AUTHORIZATION_HEADER;
 
+
+    /**
+     * Post parameters to include in the request
+     * @var array
+     */
+    private $_postParameters = array();
+
     /**
      * Request
      * @var Request\RequestInterface;
@@ -76,7 +84,9 @@ class Curl implements Connector\ConnectorInterface
 
     /**
      * Set CURL options for the CURL handle. NOTE: These may get overridden
-     * at execution time
+     * at execution time.
+     * If you want to set POST data, use setPostData(), which will prevent your
+     * post data being overwritten by oauth_ parameters
      * 
      * @param array $options
      */
@@ -85,6 +95,25 @@ class Curl implements Connector\ConnectorInterface
         foreach($options as $key => $value)
         {
             $this->_curlOptions[$key] = $value;
+        }
+    }
+
+    /**
+     * Set the post parameters for the request
+     *
+     * @param array $postParameters
+     * @param bool $merge
+     */
+    public function setPostParameters(array $postParameters, $merge=true)
+    {
+        if($merge === true)
+        {
+            $this->_postParameters = Utility\Parameter::combineParameters(
+                    $postParameters,
+                    $this->_postParameters
+            );
+        } else {
+            $this->_postParameters = $postParameters;
         }
     }
 
@@ -135,20 +164,19 @@ class Curl implements Connector\ConnectorInterface
             \CURLOPT_HEADER         => true
         );
         
+        // Add the oauth parameters
+        $this->_addOAuthParameters();
+
         // See if this should be a POST
-        // TODO: Proper HTTP method processing
         if($this->_request->getRequestMethod() == 'POST')
         {
             $options[\CURLOPT_POST] = true;
+            $options[\CURLOPT_POSTFIELDS] = Utility\Parameter::buildQueryString($this->_postParameters);
         }
 
         $this->setCurlOptions($options);
 
-        // Add the oauth parameters
-        $this->_addOAuthParameters();
-
-        // TODO: Add other parameters
-
+        
         // Add any headers to the request
         if(count($this->_curlHeaders) > 0)
         {
@@ -169,7 +197,10 @@ class Curl implements Connector\ConnectorInterface
         switch($this->_transmissionMethod)
         {
             case self::TRANSMIT_AUTHORIZATION_HEADER:
-                $this->addOAuthParametersAuthorizationHeader();
+                $this->_addOAuthParametersAuthorizationHeader();
+                break;
+            case self::FORM_ENCODED_BODY:
+                $this->_addOAuthParametersFormEncodedBody();
                 break;
             default:
                 throw new Exception('Not implemented');
@@ -181,7 +212,7 @@ class Curl implements Connector\ConnectorInterface
      * Add the OAuth parameters as per
      * http://tools.ietf.org/html/rfc5849#section-3.5.1
      */
-    private function addOAuthParametersAuthorizationHeader()
+    private function _addOAuthParametersAuthorizationHeader()
     {
         $parameters = $this->_request->getOAuthParameters();
         
@@ -196,6 +227,23 @@ class Curl implements Connector\ConnectorInterface
         $header = 'Authorization: OAuth ' . implode(', ', $headerParts);
 
         $this->_curlHeaders[] = $header;
+    }
+
+    private function _addOAuthParametersFormEncodedBody()
+    {
+        if($this->_request->getRequestMethod() !== 'POST')
+        {
+            throw new Exception('Request method must be POST to send OAuth
+                parameters in the request body');
+        }
+        
+        $oAuthParameters = $this->_request->getOAuthParameters();
+
+        $this->_postParameters = Utility\Parameter::combineParameters(
+            $this->_postParameters,
+            $oAuthParameters
+        );
+
     }
 
     /**
