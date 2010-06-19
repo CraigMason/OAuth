@@ -21,12 +21,19 @@ class Value
      */
     private $_percentEncoded;
     private $_utf8Encoded;
+    private $_encoding = 'UTF-8';
 
     public function __construct($value)
     {
         $this->set($value);
     }
 
+    /**
+     * A UTF-8 string, or number. If other encoding is used, specify with
+     * setEncoding()
+     *
+     * @param string $value
+     */
     public function set($value)
     {
         if(!is_scalar($value))
@@ -49,6 +56,17 @@ class Value
     }
 
     /**
+     * Set the value encoding. Legal values are those used by `iconv`. Use
+     * `iconv -l` to see valid encodings.
+     *
+     * @param string $encoding
+     */
+    public function setEncoding($encoding)
+    {
+        $this->_encoding = $encoding;
+    }
+
+    /**
      * Encode the UTF-8 encoded string (or raw binary) with percent encoding
      *
      * http://tools.ietf.org/html/rfc5849#section-3.6
@@ -65,8 +83,7 @@ class Value
     }
 
     /**
-     * Detects whether a string is UTF-8. If not, we will attempt to convert
-     * it to UTf-8
+     * Encodes the string as UTF-8.
      *
      * @param string $string
      * @return string UTF-8 encoded string
@@ -81,28 +98,16 @@ class Value
 
         $string = $this->_value;        
         
-        // auto detects from ASCII,JIS,UTF-8,EUC-JP,SJIS
-        $encoding = mb_detect_encoding($string);
-
-        // If we cannot detect the encoding, throw an exception
-        if($encoding === false)
+        if($this->_encoding != 'UTF-8')
         {
-            throw new Exception\ParameterException(sprintf(
-                    'Encoding of stringcould not be detected: ',
-                    $string
-            ));
-        }
-
-        /*
-         * If we can detect the encoding, and it is not UTF-8, convert it.
-         * The application should supply pre encoded parameters, but the
-         * specification appears to indicate that they should be encoded at
-         * encoding time.
-         * ASCII,JIS,UTF-8,EUC-JP,SJIS
-         */
-        if($encoding != 'UTF-8')
-        {
-            $string = mb_convert_encoding($string, 'UTF-8', $encoding);
+            $string = iconv($this->_encoding, 'UTF-8', $string);
+            if($string === false)
+            {
+                throw new \Exception(sprintf(
+                    'Invalid encoding (%s), or conversion error',
+                    $this->_encoding
+                ));
+            }
         }
 
         return $string;
