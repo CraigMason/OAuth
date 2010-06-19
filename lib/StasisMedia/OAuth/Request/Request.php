@@ -181,14 +181,55 @@ class Request implements RequestInterface
      */
     public function getParameters()
     {
-        // 1. The query component
-        //$this->_getQueryParameters();
+        return $this->_combineParameters(
+            // 1. The query component
+            $this->_getQueryParameters(),
+            // 2. The Authorization header
+            $this->_getAuthorizationHeaderParameters(),
+            // 3. The entity-body
+            $this->_getEntityBodyParameters()
+        );
+    }
 
-        // 2. The Authorization header
-        //$this->_getAuthorizationHeaderParameters();
+    /**
+     * Combine a number of key/value based parameter arrays
+     *
+     * @return array combined array
+     */
+    private function _combineParameters()
+    {
+        // Get all of the arrays supplied to the argument
+        $parameterArrays = func_get_args();
 
-        // 3. The entity-body
-        //$this->_getEntityBodyParameters();
+        $parameters = array();
+
+        // Loop through parameterArray
+        foreach($parameterArrays as $parameterArray)
+        {
+            // Loop through each Parameter
+            foreach($parameterArray as $key => $value)
+            {
+                // If the key exists, merge
+                if(array_key_exists($key, $parameters))
+                {
+                    // If scalar, convert to array first
+                    if(is_scalar($parameters[$key]))
+                    {
+                        $parameters[$key] = array($parameters[$key]);
+                    }
+
+                    $parameters[$key][] = $value;
+
+                }
+                // Paramater does not yet exist. Add scalar
+                else
+                {
+                    $parameters[$key] = $value;
+                }
+            }
+        }
+
+        return $parameters;
     }
 
     /**
