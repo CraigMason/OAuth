@@ -321,7 +321,7 @@ class Request implements RequestInterface
         }
 
         $this->setEntityBody(
-            self::buildQueryString($postParameters),
+            Utility\Parameter::buildQueryString($postParameters),
             'application/x-www-form-urlencoded'
         );
     }
@@ -538,38 +538,6 @@ class Request implements RequestInterface
         }
 
         return $parameters;
-    }
-
-    /**
-     * Transforms a key/value array of parameters into a HTTP query string.
-     * Duplicate name values will be included.
-     *
-     * @see self::parseQueryParameters()
-     *
-     * @param array $parameters
-     */
-    public static function buildQueryString($parameters)
-    {
-        // If there is nothing to parse, return an empty array
-        if( isset($parameters) === false || $parameters === false) return array();
-
-        $pairs = array();
-
-        // Loop through all keys
-        foreach($parameters as $parameter => $value)
-        {
-            if(is_array($value))
-            {
-                foreach($value as $duplicate)
-                {
-                    $pairs[] = $parameter . '=' .rawurlencode($duplicate);
-                }
-            } else {
-                $pairs[] = $parameter . '=' .rawurlencode($value);
-            }
-        }
-
-        return implode('&', $pairs);
     }
 
 }
