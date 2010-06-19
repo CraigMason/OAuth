@@ -192,7 +192,10 @@ class Curl implements Connector\ConnectorInterface
         switch($this->_transmissionMethod)
         {
             case self::TRANSMIT_AUTHORIZATION_HEADER:
-                $this->addOAuthParametersAuthorizationHeader();
+                $this->_addOAuthParametersAuthorizationHeader();
+                break;
+            case self::FORM_ENCODED_BODY:
+                $this->_addOAuthParametersFormEncodedBody();
                 break;
             default:
                 throw new Exception('Not implemented');
@@ -204,7 +207,7 @@ class Curl implements Connector\ConnectorInterface
      * Add the OAuth parameters as per
      * http://tools.ietf.org/html/rfc5849#section-3.5.1
      */
-    private function addOAuthParametersAuthorizationHeader()
+    private function _addOAuthParametersAuthorizationHeader()
     {
         $parameters = $this->_request->getOAuthParameters();
         
@@ -219,6 +222,23 @@ class Curl implements Connector\ConnectorInterface
         $header = 'Authorization: OAuth ' . implode(', ', $headerParts);
 
         $this->_curlHeaders[] = $header;
+    }
+
+    private function _addOAuthParametersFormEncodedBody()
+    {
+        if($this->_request->getRequestMethod() !== 'POST')
+        {
+            throw new Exception('Request method must be POST to send OAuth
+                parameters in the request body');
+        }
+        
+        $oAuthParameters = $this->_request->getOAuthParameters();
+
+        $this->_postParameters = Utility\Parameter::combineParameters(
+            $this->_postParameters,
+            $oAuthParameters
+        );
+
     }
 
     /**
