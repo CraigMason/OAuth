@@ -31,7 +31,7 @@ class Request implements RequestInterface
 
     /*
      * A number of parameters are USUALLY required, but when using PLAINTEXT
-     * signature method, many can be excluded. 
+     * signature method, many can be excluded.
      *
      * http://tools.ietf.org/html/rfc5849#section-3.1
      */
@@ -264,7 +264,7 @@ class Request implements RequestInterface
     private function _getQueryParameters()
     {
         $queryString = $this->_urlComponents['query'];
-        
+
         return self::parseQueryParameters($queryString);
 
     }
@@ -284,7 +284,7 @@ class Request implements RequestInterface
 
     /**
      * Get the endpoint of the Request
-     * 
+     *
      * @return String
      */
     public function getUrl()
@@ -321,8 +321,8 @@ class Request implements RequestInterface
      * @see setPostData
      * @see _getParameters
      *
-     * @param <type> $body
-     * @param <type> $contentType
+     * @param string $body
+     * @param string $contentType
      */
     public function setEntityBody($entityBody, $contentType = null)
     {
@@ -352,7 +352,7 @@ class Request implements RequestInterface
     /**
      * Set the Authorization header to auth-scheme 'OAuth' and construct the
      * header from the parameters
-     * 
+     *
      * @param array Parameters
      * @param bool $encoded if the supplied parameters are encoded
      */
@@ -364,7 +364,7 @@ class Request implements RequestInterface
             // Check if we need to encoded the parameters
             $key = $encoded ? $key : rawurlencode($key);
             $value = $encoded ? $value : rawurlencode($value);
-            
+
             $pairs[] = $key . '="' . $value . '"';
         }
 
@@ -415,7 +415,7 @@ class Request implements RequestInterface
      *   * The 'Content-Type' header is 'application/x-www-form-urlencoded'
      *
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
-     * 
+     *
      * @return array rawurlencoded key/value pairs
      */
     private function _getEntityBodyParameters()
