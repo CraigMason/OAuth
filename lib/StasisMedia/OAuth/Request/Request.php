@@ -305,15 +305,22 @@ class Request implements RequestInterface
     }
 
     /**
-     * Set the Authorization header to auth-scheme 'OAuth'
-     * @param <type> $parameters
+     * Set the Authorization header to auth-scheme 'OAuth' and construct the
+     * header from the parameters
+     * 
+     * @param array Parameters
+     * @param bool $encoded if the supplied parameters are encoded
      */
-    public function setOAuthAuthorizationHeader($parameters)
+    public function setOAuthAuthorizationHeader($parameters, $encoded = false)
     {
         $pairs = array();
         foreach($parameters as $key => $value)
         {
-            $pairs[] = rawurlencode($key) . '="' . rawurlencode($value) . '"';
+            // Check if we need to encoded the parameters
+            $key = $encoded ? $key : rawurlencode($key);
+            $value = $encoded ? $value : rawurlencode($value);
+            
+            $pairs[] = $key . '="' . $value . '"';
         }
 
         // Set the header
