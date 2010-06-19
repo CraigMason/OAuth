@@ -328,6 +328,38 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get the parameters from the Authorization header. We do not provide
+     * an interface to set a different scheme, so we immediately parse
+     * the parameters.
+     *
+     * The parameters will already be rawurlencoded
+     *
+     * @return Array rawurlencoded key/value pairs
+     */
+    private function _getAuthorizationHeaderParameters()
+    {
+        if(array_key_exists('Authorization', $this->_headers) === false) return array();
+
+        // Get the header, and remove the 'OAuth ' auth-scheme part
+        $header = preg_replace('/OAuth\s/', '', $this->_headers['Authorization']);
+
+        $parts = explode(',', $header);
+
+        $parameters = array();
+        foreach($parts as $part)
+        {
+            $pair = explode('=', $part, 2);
+
+            // Do NOT include the 'realm' parameter
+            if($pair[0] === 'realm') continue;
+            
+            $parameters[$pair[0]] = trim($pair[1], '"');
+        }
+
+        return $parameters;
+    }
+
+    /**
      * Constructs the base string
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
      */
