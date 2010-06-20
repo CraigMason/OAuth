@@ -2,6 +2,7 @@
 namespace StasisMedia\OAuth\Request;
 
 use StasisMedia\OAuth\Utility;
+use \StasisMedia\OAuth\Parameter;
 
 /**
  * OAuth 1.0 Request
@@ -83,8 +84,9 @@ class Request implements RequestInterface
 
     /**
      * The oauth parameters that do not exist elsewhere in the request
+     * @var Parameter\Collection
      */
-    private $_oauthParameters = array();
+    private $_oauthParameters;
 
     /**
      * Adds the required and optional parameters for all requests
@@ -102,6 +104,8 @@ class Request implements RequestInterface
             'oauth_token',
             'oauth_version'
         ));
+
+        $this->_oauthParameters = new Parameter\Collection();
     }
 
     /**
@@ -148,7 +152,7 @@ class Request implements RequestInterface
 
     public function getMissingParameters()
     {
-        return array_diff($this->_requiredOAuthParameters, array_keys($this->getOAuthParameters()));
+        return array_diff($this->_requiredOAuthParameters->getNames(), array_keys($this->getOAuthParameters()));
     }
 
     /**
@@ -216,19 +220,22 @@ class Request implements RequestInterface
     }
 
     /**
-     * Set an array of oauth_ parameters
+     * Set an array of oauth_ parameters, overwriting old values
      *
      * @param array $parameters
      */
     public function setOAuthParameters(array $parameters)
     {
-        $this->_oauthParameters = array_merge($this->_oauthParameters, $parameters);
+        foreach($parameters as $key => $value)
+        {
+            $this->_oauthParameters->reset($key, $value);
+        }
     }
 
     /**
      * Return the oauth parameters
      *
-     * @return array
+     * @return Parameter\Collection
      */
     public function getOAuthParameters()
     {
@@ -486,51 +493,6 @@ class Request implements RequestInterface
         return $baseStringURI;
     }
 
-    /**
-     * Parses the query-string of a URI into an associative array. Duplicate
-     * keys will transform the parameter into an array
-     *
-     * @see Request::buildHttpQuery
-     *
-     * @param string $parameters
-     */
-    public static function parseQueryParameters($queryString)
-    {
-        // If there is nothing to parse, return an empty array
-        if( isset($queryString) === false || $queryString === false) return array();
-
-        // Resulting parameters
-        $parameters = array();
-
-        // Split the key pairs with an ampersand
-        $pairs = explode('&', $queryString);
-
-        foreach($pairs as $pair)
-        {
-            $split = explode('=', $pair, 2);
-
-            // TODO: Can array keys be utf-8 strings?
-            $parameter = rawurldecode($split[0]);
-            // Value may be blank
-            $value = isset($split[1]) ? rawurldecode($split[1]) : '';
-
-            // If the key exists, it must be appended to the list
-            if(array_key_exists($parameter, $parameters))
-            {
-                if(is_scalar($parameters[$parameter]))
-                {
-                    $parameters[$parameter] = array($parameters[$parameter]);
-                }
-                $parameters[$parameter][] = $value;
-            }
-            // Paramater does not exist. Add it to the list normally
-            else
-            {
-                $parameters[$parameter] = $value;
-            }
-        }
-
-        return $parameters;
-    }
+    
 
 }
