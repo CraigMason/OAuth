@@ -45,6 +45,17 @@ class Collection
         return $this->_parameters;
     }
 
+    /**
+     * Get the key values of the parameters array, which match the 'name'
+     * property of each Value
+     *
+     * @return array
+     */
+    public function getNames()
+    {
+        return array_keys($this->_parameters);
+    }
+
     public function exists($name)
     {
         return array_key_exists($name, $this->_parameters);
