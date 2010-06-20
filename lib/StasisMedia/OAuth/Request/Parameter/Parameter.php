@@ -96,7 +96,8 @@ class Parameter implements \Iterator
      * first, which may not be expected.
      */
     public function getNormalized()
-    {        
+    {
+        $this->sort();
         $pairs = array();
         foreach($this->_values as $value)
         {
