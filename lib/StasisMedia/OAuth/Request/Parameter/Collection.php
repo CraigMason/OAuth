@@ -124,7 +124,7 @@ class Collection
     }
 
     /**
-     * Parses the query-string of a URI into an associative array. Duplicate
+     * Parse the query-string of a URI into an associative array. Duplicate
      * keys will transform the parameter into an array
      *
      * @return Collection
@@ -154,6 +154,13 @@ class Collection
         return $collection;
     }
 
+    /**
+     * Parse the Authorization header content. Scheme will be removed
+     *
+     * @param string $header
+     * 
+     * @return Collection
+     */
     public static function fromAuthorizationHeader($header)
     {
         if(empty($header)) return null;
@@ -161,7 +168,7 @@ class Collection
         $collection = new \StasisMedia\OAuth\Parameter\Collection();
 
         // Get the header, and remove the 'OAuth ' auth-scheme part
-        $header = preg_replace('/OAuth\s/', '', $header);
+        $header = preg_replace('/^\w+\s/', '', $header);
 
         $parts = preg_split('/,\s?/', $header);
         foreach($parts as $part)
