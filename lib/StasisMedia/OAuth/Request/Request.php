@@ -401,27 +401,17 @@ class Request implements RequestInterface
      *
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
      *
-     * @return array rawurlencoded key/value pairs
+     * @return Parameter\Collection
      */
     private function _getEntityBodyParameters()
     {
         // If there is no entity body, return an empty array
         if(empty($this->_entityBody) === true) return array();
 
-        /*
-         * If the 'Content-Type' header is not 'application/x-www-form-urlencoded'
-         * return an empty array
-         */
-        if(array_key_exists('Content-Type', $this->_headers) === false) return array();
-        if($this->_headers['Content-Type'] !== 'application/x-www-form-urlencoded') return array();
+        // If no 'Content-Type' header
+        if(array_key_exists('Content-Type', $this->_headers) === false) return null;
 
-        // If we are here, the header is intact
-        $parameters = self::parseQueryParameters($this->_entityBody);
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromEntityBody($this->_entityBody, $this->_headers['Content-Type']);
     }
 
     /**

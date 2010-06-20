@@ -125,7 +125,10 @@ class Collection
 
     /**
      * Parse the query-string of a URI into an associative array. Duplicate
-     * keys will transform the parameter into an array
+     * keys will transform the parameter into an array.
+     *
+     * Note: We will be decoding a query string, so we must use 'urldecode',
+     * not 'rawurldecode()' as would be used in OAuth parameters
      *
      * @return Collection
      */
@@ -144,9 +147,9 @@ class Collection
         {
             $split = explode('=', $pair, 2);
 
-            $name = rawurldecode($split[0]);
+            $name = urldecode($split[0]);
             // Value may be blank
-            $value = isset($split[1]) ? rawurldecode($split[1]) : '';
+            $value = isset($split[1]) ? urldecode($split[1]) : '';
 
             $collection->add($name, $value);
         }
@@ -179,12 +182,27 @@ class Collection
             if($pair[0] === 'realm') continue;
 
             $collection->add(
-                rawurldecode($pair[0]),
-                rawurldecode(trim($pair[1], '"'))
+                urldecode($pair[0]),
+                urldecode(trim($pair[1], '"'))
             );
         }
 
         return $collection;
+    }
+
+
+    /**
+     *
+     * @param string $entityBody
+     * @param string $contentType
+     * @return Collection
+     */
+    public static function fromEntityBody($entityBody, $contentType)
+    {
+        //return null if $contentTypeis not 'application/x-www-form-urlencoded'
+        if($contentType !== 'application/x-www-form-urlencoded') return null;
+
+        return self::fromQueryString($entityBody);
     }
 
 }

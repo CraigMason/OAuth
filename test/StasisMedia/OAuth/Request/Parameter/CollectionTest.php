@@ -110,6 +110,14 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testFromQueryString()
     {
+        // Check we're using 'application/x-www-form-urlencoded decding
+        $queryString = 'a=1+2';
+        $collection = \StasisMedia\OAuth\Parameter\Collection::fromQueryString($queryString);
+        $parameter = $collection->get('a');
+        $value = reset($parameter->getValues());
+        $this->assertEquals('1 2', (string) $value);
+
+
         $queryString = 'a=x%20y&a=x%21y';
         $collection = \StasisMedia\OAuth\Parameter\Collection::fromQueryString($queryString);
 
@@ -149,7 +157,17 @@ EOT;
         $this->assertEquals('ad180jjd733klru7', (string) $value);
         $value = reset($collection->get('oauth_version')->getValues());
         $this->assertEquals('1.0', (string) $value);
+    }
 
+    public function testFromEntityBody()
+    {
+        $entityBody = 'Name=Jonathan+Doe&Age=23&Formula=a+%2B+b+%3D%3D+13%25%21';
+        $collection = Collection::fromEntityBody($entityBody, 'application/x-www-form-urlencoded');
 
+        $parameter = $collection->get('Formula');
+        $this->assertTrue(isset($parameter));
+
+        $value = reset($parameter->getValues());
+        $this->assertEquals('a + b == 13%!', (string) $value);
     }
 }
