@@ -15,6 +15,7 @@ class Collection
     public function add($name, $values)
     {
         $name = (string) $name;
+        if(empty($name)) throw new Exception\ParameterException('Name cannot be empty');
 
         $values = (array) $values;
 
