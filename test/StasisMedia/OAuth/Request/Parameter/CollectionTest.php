@@ -32,6 +32,18 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
        $this->assertEquals('bar', (string) $collection->get('bar')->getName());
        $this->assertEquals('test', (string) $collection->get('test')->getName());
+    }
+
+    public function testReset()
+    {
+       $collection = new Collection();
+       $collection->add('alpha', 'foo');
+       $collection->add('bravo', array('foo', 'bar'));
+
+       // Reset parameter 'bravo' to single value 'test'
+       $collection->reset('bravo', 'test');
+       $value = reset($collection->get('bravo')->getValues());
+       $this->assertEquals('test', (string) $value);
 
     }
 

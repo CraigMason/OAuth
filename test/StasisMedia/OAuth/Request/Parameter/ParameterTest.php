@@ -39,6 +39,20 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(6, count($parameter->getValues()));
     }
 
+    public function testReset()
+    {
+        $parameter = new Parameter('key', 'alpha');
+        $parameter->addValue('bravo');
+        $parameter->addValue('charlie');
+        $parameter->reset('delta');
+
+        $this->assertEquals(1, count($parameter->getValues()));
+        
+        $value = reset($parameter->getValues());
+        $this->assertEquals('delta', (string) $value);
+
+    }
+
     public function testGetValue()
     {
         $parameter = new Parameter('key', 'foo');
