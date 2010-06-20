@@ -97,7 +97,7 @@ class Value
         if(!is_string($this->_value)) return $this->_value;
 
         $string = $this->_value;        
-        
+
         if($this->_encoding != 'UTF-8')
         {
             $string = iconv($this->_encoding, 'UTF-8', $string);

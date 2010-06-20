@@ -77,39 +77,6 @@ class Parameter implements \Iterator
     }
 
     /**
-     * Get the current Value object
-     * @return Value
-     */
-    function current()
-    {
-        return $this->_values[$this->_position];
-    }
-
-    /**
-     * Just a numeric index, only used when iterating
-     * @return <type>
-     */
-    function key()
-    {
-        return $this->_position;
-    }
-
-    function rewind()
-    {
-        $this->_position = 0;
-    }
-
-    function next()
-    {
-        ++$this->_position;
-    }
-
-    function valid()
-    {
-        return isset($this->_values[$this->_position]);
-    }
-
-    /**
      * Returns the normalised string for this parameter. This differs from
      * a traditional 'join', as text values will have been converted into UTF-8
      * first, which may not be expected.
@@ -141,4 +108,42 @@ class Parameter implements \Iterator
             return strcmp($a->getPercentEncoded(), $b->getPercentEncoded());
         });
     }
+
+    /*
+     * Iterator implementation
+     */
+
+    /**
+     * Get the current Value object
+     * @return Value
+     */
+    public function current()
+    {
+        return $this->_values[$this->_position];
+    }
+
+    /**
+     * Just a numeric index, only used when iterating
+     * @return <type>
+     */
+    public function key()
+    {
+        return $this->_position;
+    }
+
+    public function rewind()
+    {
+        $this->_position = 0;
+    }
+
+    public function next()
+    {
+        ++$this->_position;
+    }
+
+    function valid()
+    {
+        return isset($this->_values[$this->_position]);
+    }
+
 }
