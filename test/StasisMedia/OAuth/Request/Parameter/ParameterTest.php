@@ -15,9 +15,6 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
     {
         $parameter = new Parameter('name', '');
         $this->assertEquals('name', (string) $parameter->getName());
-
-        $parameter->setName('foo');
-        $this->assertEquals('foo', (string) $parameter->getName());
     }
 
     public function testToString()
