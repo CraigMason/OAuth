@@ -61,9 +61,9 @@ class Collection
         return array_key_exists($name, $this->_parameters);
     }
 
-    private function sort()
+    private function _sort()
     {
-        usort($this->_parameters, function($a, $b){
+        uasort($this->_parameters, function($a, $b){
             /* @var $a Parameter */
             /* @var $b Parameter */
             return strcmp(
@@ -78,7 +78,7 @@ class Collection
      */
     public function getNormalized()
     {
-        $this->sort();
+        $this->_sort();
         $pairs = array();
         foreach($this->_parameters as $parameter)
         {
