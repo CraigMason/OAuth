@@ -55,6 +55,21 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
        $this->assertEquals('d', (string) $values[3]);
     }
 
+    public function testGetNames()
+    {
+        $collection = new Collection();
+        $collection->add('foo', 'a');
+        $collection->add('foo', 'b');
+        $collection->add('bar', 'a');
+
+        $this->assertEquals(array('bar', 'foo'), $collection->getNames());
+
+        $collection->add('alpha', 'a');
+        
+        $this->assertEquals(array('alpha', 'bar', 'foo'), $collection->getNames());
+
+    }
+
     public function testNormalization()
     {
         $collection = new Collection();
