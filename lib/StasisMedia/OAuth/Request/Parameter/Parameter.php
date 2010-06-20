@@ -52,11 +52,33 @@ class Parameter implements \Iterator
         return $this->_name;
     }
 
+    /**
+     * Removes all values and sets single value
+     * 
+     * @param string
+     */
+    public function reset($value)
+    {
+        unset($this->_values);
+        
+        $this->addValue($value);
+    }
+
+    /**
+     * Adds a value as a duplicate
+     * 
+     * @param string $value
+     */
     public function addValue($value)
     {
         $this->addValues((array) $value);
     }
 
+    /**
+     * Adds values as duplicates
+     * 
+     * @param array $values
+     */
     public function addValues(array $values)
     {
        foreach($values as $value)

@@ -37,6 +37,22 @@ class Collection
     }
 
     /**
+     * Reset a single parameter/value pair to the supplied values
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function reset($name, $value)
+    {
+        if($this->exists($name))
+        {
+            $this->get($name)->reset($value);
+        } else {
+            $this->add($name, $value);
+        }
+    }
+
+    /**
      *
      * @param string $name
      * 
