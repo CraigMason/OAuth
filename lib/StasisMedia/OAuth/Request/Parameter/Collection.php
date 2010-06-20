@@ -22,6 +22,7 @@ class Collection
         if(!$this->exists($name))
         {
             $this->_parameters[$name] = new Parameter($name, $values);
+            $this->_sort();
         }
         else {
             $this->get($name)->addValues($values);
