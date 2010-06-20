@@ -361,20 +361,13 @@ class Request implements RequestInterface
      * Get the key/value pairs of parameters supplied in the query string
      * of the URL
      *
-     * @return array rawurldecoded key/value pairs
+     * @return Parameter\Collection rawurldecoded
      */
     private function _getQueryParameters()
     {
         if(array_key_exists('query', $this->_urlComponents) === false) return array();
 
-        $queryString = $this->_urlComponents['query'];
-
-        $parameters = self::parseQueryParameters($queryString);
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromQueryString($this->_urlComponents['query']);
     }
 
     /**

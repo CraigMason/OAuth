@@ -107,4 +107,24 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $collection->add('x', 'a');
         $this->assertEquals('x=a&x%21y=a', $collection->getNormalized());
     }
+
+    public function testFromQueryString()
+    {
+        $queryString = 'a=x%20y&a=x%21y';
+        $collection = \StasisMedia\OAuth\Parameter\Collection::fromQueryString($queryString);
+
+        $parameters = $collection->getAll();
+        $this->assertEquals(1, count($parameters));
+
+        $values = $collection->get('a')->getValues();
+
+        $this->assertEquals('x y', $values[0]->get());
+        $this->assertEquals('x!y', $values[1]->get());
+
+        $queryString = 'arabic=%D9%81%D8%B5%D8%AD%D9%89';
+        $collection = \StasisMedia\OAuth\Parameter\Collection::fromQueryString($queryString);
+        $value = reset($collection->get('arabic')->getValues());
+
+        $this->assertEquals("\xd9\x81\xd8\xb5\xd8\xad\xd9\x89", $value->get());
+    }
 }

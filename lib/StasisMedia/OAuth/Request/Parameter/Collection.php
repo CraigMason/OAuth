@@ -122,4 +122,37 @@ class Collection
 
         return implode('&', $pairs);
     }
+
+    /**
+     * Parses the query-string of a URI into an associative array. Duplicate
+     * keys will transform the parameter into an array
+     *
+     * @return Collection
+     */
+    public static function fromQueryString($queryString)
+    {
+        // If there is nothing to parse, return an empty array
+        if( isset($queryString) === false || $queryString === false) return null;
+
+        // New collection
+        $collection = new \StasisMedia\OAuth\Parameter\Collection();
+
+        // Split the key pairs with an ampersand
+        $pairs = explode('&', $queryString);
+
+        foreach($pairs as $pair)
+        {
+            $split = explode('=', $pair, 2);
+
+            $name = rawurldecode($split[0]);
+            // Value may be blank
+            $value = isset($split[1]) ? rawurldecode($split[1]) : '';
+
+            $collection->add($name, $value);
+        }
+
+        return $collection;
+    }
+
+
 }
