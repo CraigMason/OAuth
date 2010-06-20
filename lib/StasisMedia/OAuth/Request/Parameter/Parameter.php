@@ -78,6 +78,8 @@ class Parameter implements \Iterator
      * Returns the normalised string for this parameter. This differs from
      * a traditional 'join', as text values will have been converted into UTF-8
      * first, which may not be expected.
+     *
+     * @return string
      */
     public function getNormalized()
     {

@@ -12,6 +12,12 @@ class Collection
 {
     private $_parameters = array();
 
+    /**
+     * Add a key/value pair. Value can be an array of values
+     * 
+     * @param string $name
+     * @param string|array $values String or array of string values
+     */
     public function add($name, $values)
     {
         $name = (string) $name;
@@ -33,6 +39,7 @@ class Collection
     /**
      *
      * @param string $name
+     * 
      * @return Parameter
      */
     public function get($name)
@@ -40,6 +47,11 @@ class Collection
         return $this->exists($name) ? $this->_parameters[$name] : null;
     }
 
+    /**
+     * Return all parameters as Parameter objects
+     *
+     * @return array
+     */
     public function getAll()
     {
         return $this->_parameters;
@@ -56,6 +68,12 @@ class Collection
         return array_keys($this->_parameters);
     }
 
+    /**
+     *
+     * @param string $name Value name property
+     * 
+     * @return bool
+     */
     public function exists($name)
     {
         return array_key_exists($name, $this->_parameters);
