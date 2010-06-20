@@ -98,7 +98,7 @@ class Parameter implements \Iterator
      * as if they were percent encoded. Those functions use caches, so should
      * be mighty speedy.
      */
-    public function sort()
+    private function sort()
     {
         usort($this->_values, function($a, $b){
             /* @var $a Value */
