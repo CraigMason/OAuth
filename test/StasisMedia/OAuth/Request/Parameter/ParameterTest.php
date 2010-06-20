@@ -51,5 +51,11 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
 
         $parameter->addValue('a');
         $this->assertEquals('a=a&a=b', $parameter->getNormalized());
+
+        $parameter = new Parameter('x!y', array('b', 'a'));
+        $this->assertEquals('x%21y=a&x%21y=b', $parameter->getNormalized());
+        
+        $parameter = new Parameter("x\xD8\x80y", array("\x03\x04", "\x01\x02"));
+        $this->assertEquals('x%D8%80y=%01%02&x%D8%80y=%03%04', $parameter->getNormalized());
     }
 }
