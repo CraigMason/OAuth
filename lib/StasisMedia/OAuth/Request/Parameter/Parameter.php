@@ -13,10 +13,10 @@ namespace StasisMedia\OAuth\Parameter;
 class Parameter implements \Iterator
 {
     /**
-     * The key is actually of type Value, as it must be percent encoded too
+     * The name is actually of type Value, as it must be percent encoded too
      * @var Value
      */
-    private $_key;
+    private $_name;
 
     /**
      * Array of Value objects
@@ -27,12 +27,31 @@ class Parameter implements \Iterator
     private $_position = 0;
 
 
-    public function __construct($key, $values)
+    public function __construct($name, $values)
     {
         $this->_position = 0;
 
-        $this->_key = new Value($key);
+        $this->_name = new Value($name);
         $this->addValues((array) $values);
+    }
+
+    public function __tostring()
+    {
+        return $this->getNormalized();
+    }
+
+    public function setName($name)
+    {
+        $this->_name = new Value($name);
+    }
+
+    /**
+     *
+     * @return Value
+     */
+    public function getName()
+    {
+        return $this->_name;
     }
 
     public function addValue($value)
@@ -103,7 +122,7 @@ class Parameter implements \Iterator
         {
             /* @var $value Value */
 
-            $pairs[] = $this->_key->getPercentEncoded() . '=' . $value->getPercentEncoded();
+            $pairs[] = $this->_name->getPercentEncoded() . '=' . $value->getPercentEncoded();
         }
 
         return implode('&', $pairs);
