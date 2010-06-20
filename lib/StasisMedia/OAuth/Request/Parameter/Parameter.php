@@ -49,6 +49,15 @@ class Parameter implements \Iterator
     }
 
     /**
+     * All values in an array
+     * @return Array
+     */
+    public function getValues()
+    {
+        return $this->_values;
+    }
+
+    /**
      * Get the current Value object
      * @return Value
      */
