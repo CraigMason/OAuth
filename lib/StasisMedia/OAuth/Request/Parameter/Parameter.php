@@ -37,7 +37,7 @@ class Parameter implements \Iterator
 
     public function addValue($value)
     {
-        $this->addValues((array) $values);
+        $this->addValues((array) $value);
     }
 
     public function addValues(array $values)
