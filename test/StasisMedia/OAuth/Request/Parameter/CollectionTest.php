@@ -127,4 +127,29 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals("\xd9\x81\xd8\xb5\xd8\xad\xd9\x89", $value->get());
     }
+
+    public function testFromAuthorizationHeader()
+    {
+        $header = <<<EOT
+OAuth realm="Example",
+oauth_consumer_key="0685bd9184jfhq22",
+oauth_token="ad180jjd733klru7",
+oauth_signature_method="HMAC-SHA1",
+oauth_signature="wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D",
+oauth_timestamp="137131200",
+oauth_nonce="4572616e48616d6d65724c61686176",
+oauth_version="1.0"
+EOT;
+        $collection = Collection::fromAuthorizationHeader($header);
+        $parameters = $collection->getAll();
+        $this->assertEquals(7, count($parameters));
+        $this->assertEquals(true, $collection->exists('oauth_signature'));
+        
+        $value = reset($collection->get('oauth_token')->getValues());
+        $this->assertEquals('ad180jjd733klru7', (string) $value);
+        $value = reset($collection->get('oauth_version')->getValues());
+        $this->assertEquals('1.0', (string) $value);
+
+
+    }
 }

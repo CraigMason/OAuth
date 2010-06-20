@@ -390,26 +390,7 @@ class Request implements RequestInterface
     {
         if(array_key_exists('Authorization', $this->_headers) === false) return array();
 
-        // Get the header, and remove the 'OAuth ' auth-scheme part
-        $header = preg_replace('/OAuth\s/', '', $this->_headers['Authorization']);
-
-        $parts = explode(',', $header);
-
-        $parameters = array();
-        foreach($parts as $part)
-        {
-            $pair = explode('=', $part, 2);
-
-            // Do NOT include the 'realm' parameter
-            if($pair[0] === 'realm') continue;
-
-            $parameters[$pair[0]] = trim($pair[1], '"');
-        }
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromAuthorizationHeader($this->_headers['Authorization']);
     }
 
     /**

@@ -154,5 +154,30 @@ class Collection
         return $collection;
     }
 
+    public static function fromAuthorizationHeader($header)
+    {
+        if(empty($header)) return null;
+
+        $collection = new \StasisMedia\OAuth\Parameter\Collection();
+
+        // Get the header, and remove the 'OAuth ' auth-scheme part
+        $header = preg_replace('/OAuth\s/', '', $header);
+
+        $parts = preg_split('/,\s?/', $header);
+        foreach($parts as $part)
+        {
+            $pair = explode('=', $part, 2);
+
+            // Do NOT include the 'realm' parameter
+            if($pair[0] === 'realm') continue;
+
+            $collection->add(
+                rawurldecode($pair[0]),
+                rawurldecode(trim($pair[1], '"'))
+            );
+        }
+
+        return $collection;
+    }
 
 }
