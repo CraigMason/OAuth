@@ -11,6 +11,22 @@ use StasisMedia\OAuth\Exception\ParameterException;
 
 class ParameterTest extends \PHPUnit_Framework_TestCase
 {
+    public function testName()
+    {
+        $parameter = new Parameter('name', '');
+        $this->assertEquals('name', (string) $parameter->getName());
+
+        $parameter->setName('foo');
+        $this->assertEquals('foo', (string) $parameter->getName());
+    }
+
+    public function testToString()
+    {
+        $parameter = new Parameter('name', 'foo');
+        $parameter->addValue('bar');
+        $this->assertEquals('name=bar&name=foo', (string) $parameter);
+    }
+
     public function testAddValue()
     {
         $parameter = new Parameter('key', 'foo');
