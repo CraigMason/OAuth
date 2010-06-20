@@ -4,7 +4,10 @@ namespace StasisMedia\OAuth\Parameter;
 /**
  * HTTP Parameter
  *
- * Key/Value pair. Value is an array of values
+ * Name/Value pair. Name can only be set during construction.
+ * A value must be passed, but can be blank.
+ *
+ * Value is an array of Value objects
  *
  * @author      Craig Mason <craig.mason@stasismedia.com>
  * @package     OAuth
@@ -38,11 +41,6 @@ class Parameter implements \Iterator
     public function __tostring()
     {
         return $this->getNormalized();
-    }
-
-    public function setName($name)
-    {
-        $this->_name = new Value($name);
     }
 
     /**
