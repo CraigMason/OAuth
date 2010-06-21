@@ -155,8 +155,13 @@ EOT;
         
         $value = reset($collection->get('oauth_token')->getValues());
         $this->assertEquals('ad180jjd733klru7', (string) $value);
+
         $value = reset($collection->get('oauth_version')->getValues());
         $this->assertEquals('1.0', (string) $value);
+
+        $value = reset($collection->get('oauth_signature')->getValues());
+        $this->assertEquals('wOJIO9A2W5mFwDgiDvZbTSMK%2FPY%3D', (string) $value);
+
     }
 
     public function testFromEntityBody()
@@ -169,5 +174,29 @@ EOT;
 
         $value = reset($parameter->getValues());
         $this->assertEquals('a + b == 13%!', (string) $value);
+    }
+
+    public function testMerge()
+    {
+        $collection1 = new Collection();
+        $collection1->add('alpha', 'test1');
+        $collection1->add('bravo', 'test2');
+
+        $collection2 = new Collection();
+        $collection2->add('alpha', 'test3');
+        $collection2->add('bravo', 'test4');
+        $collection2->add('bravo', 'test5');
+
+        $collection3 = Collection::merge($collection1, $collection2);
+
+        $parameters = $collection3->getAll();
+
+        $this->assertEquals(2, count($parameters));
+
+        $this->assertEquals(2, count($collection3->get('alpha')->getValues()));
+        $this->assertEquals(3, count($collection3->get('bravo')->getValues()));
+
+        $normalized = 'bravo=test2&bravo=test4&bravo=test5';
+        $this->assertEquals($normalized, $collection3->get('bravo')->getNormalized());
     }
 }

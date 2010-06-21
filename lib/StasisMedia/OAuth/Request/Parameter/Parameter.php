@@ -131,6 +131,17 @@ class Parameter implements \Iterator
         });
     }
 
+    /**
+     * Absorbs the values from the supplied Parameber into this instance
+     *
+     * @param Parameter $parameter
+     */
+    public function absorb(Parameter $parameter)
+    {
+        $this->_values = array_merge($this->_values, $parameter->getValues());
+    }
+
+
     /*
      * Iterator implementation
      */

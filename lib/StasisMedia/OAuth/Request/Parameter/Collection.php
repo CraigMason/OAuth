@@ -218,4 +218,56 @@ class Collection
         return self::fromQueryString($entityBody);
     }
 
+    /**
+     * Merges the parameters of the supplied Collection into this instance
+     *
+     * @param Collection $collection
+     */
+    public function absorb(Collection $collection)
+    {
+        $parameters = $collection->getAll();
+
+        foreach($parameters as $parameter)
+        {
+            /* @var $parameter Parameter */
+            $name = $parameter->getName()->get();
+            if($this->exists($name))
+            {
+                $this->get($name)->absorb($parameter);
+            }
+            else
+            {
+                $this->_parameters[$name] = $parameter;
+            }
+        }
+        
+    }
+
+
+    /**
+     * Merges a number of collections and returns a new collection
+     *
+     * @return Collection
+     */
+    public static function merge()
+    {
+        $args = func_get_args();
+
+        $merged = null;
+
+        foreach($args as $collection)
+        {
+            if($collection !== null && $collection instanceof Collection)
+            {
+                // If no collection set yet, use it
+                if($merged === null) { $merged = $collection; continue; }
+
+                // Merge this collection's parameters with $merged
+                $merged->absorb(clone $collection);
+            }
+        }
+
+        return $merged;
+    }
+
 }
