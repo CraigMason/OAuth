@@ -158,7 +158,20 @@ class Collection
     }
 
     /**
-     * Parse the Authorization header content. Scheme will be removed
+     * Parse the Authorization header content. Scheme will be removed.
+     *
+     * TODO: Properly paste the token=quotedstring format.
+     * TODO: Check Authorization header spec
+     *
+     * The name="value" format is NOT urlencoded. The BNF for HTTP 1.1 rfc2616
+     * (http://tools.ietf.org/html/rfc2616#section-4.2) states the following:
+     *
+     * field-name can be any TOKEN, which is US-ASCII (octets) 0-127 excluding
+     * CTL characters and seperators ()<>@,;:\"/[]?={} space (\x32) tab(\x9)
+     *
+     * field-value can be spaces or TEXT (any octet except CTL characters) or
+     * a combination of TOKENs (rules above), separators and quoted-string
+     * (any TEXT, surrounded in ", or any US-ASCII CHAR escaped with a backslash)
      *
      * @param string $header
      * 
@@ -182,8 +195,8 @@ class Collection
             if($pair[0] === 'realm') continue;
 
             $collection->add(
-                urldecode($pair[0]),
-                urldecode(trim($pair[1], '"'))
+                $pair[0],
+                trim($pair[1], '"')
             );
         }
 
