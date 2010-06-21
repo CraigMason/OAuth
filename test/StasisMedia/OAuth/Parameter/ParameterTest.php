@@ -1,11 +1,11 @@
 <?php
 namespace StasisMedia\OAuth\Parameter;
 
-$base = dirname(__FILE__) . '/../../../../../lib/StasisMedia/OAuth';
+$base = dirname(__FILE__) . '/../../../../lib/StasisMedia/OAuth';
 
 require_once $base . '/Exception/ParameterException.php';
-require_once $base . '/Request/Parameter/Value.php';
-require_once $base . '/Request/Parameter/Parameter.php';
+require_once $base . '/Parameter/Value.php';
+require_once $base . '/Parameter/Parameter.php';
 
 use StasisMedia\OAuth\Exception\ParameterException;
 
