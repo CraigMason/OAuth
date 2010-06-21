@@ -172,7 +172,7 @@ class Request implements RequestInterface
      * Parameters should all be decoded, according to
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.3
      *
-     * @return array
+     * @return Parameter\Collection
      */
     public function getParameters()
     {
@@ -342,7 +342,7 @@ class Request implements RequestInterface
      */
     private function _getQueryParameters()
     {
-        if(array_key_exists('query', $this->_urlComponents) === false) return array();
+        if(array_key_exists('query', $this->_urlComponents) === false) return null;
 
         return Parameter\Collection::fromQueryString($this->_urlComponents['query']);
     }
@@ -358,7 +358,7 @@ class Request implements RequestInterface
      */
     private function _getAuthorizationHeaderParameters()
     {
-        if(array_key_exists('Authorization', $this->_headers) === false) return array();
+        if(array_key_exists('Authorization', $this->_headers) === false) return null;
 
         return Parameter\Collection::fromAuthorizationHeader($this->_headers['Authorization']);
     }
@@ -376,7 +376,7 @@ class Request implements RequestInterface
     private function _getEntityBodyParameters()
     {
         // If there is no entity body, return an empty array
-        if(empty($this->_entityBody) === true) return array();
+        if(empty($this->_entityBody) === true) return null;
 
         // If no 'Content-Type' header
         if(array_key_exists('Content-Type', $this->_headers) === false) return null;
