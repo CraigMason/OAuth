@@ -262,8 +262,8 @@ class Collection
                 if(($collection instanceof Collection) === false)
                 {
                     throw new \Exception(sprintf(
-                            '$collection must be of type %s',
-                            __CLASS__
+                            '$collection must be of type %s. %s given',
+                            __CLASS__, gettype($collection)
                     ));
                 }
                 // If no collection set yet, use it
