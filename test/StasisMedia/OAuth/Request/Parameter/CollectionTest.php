@@ -198,5 +198,14 @@ EOT;
 
         $normalized = 'bravo=test2&bravo=test4&bravo=test5';
         $this->assertEquals($normalized, $collection3->get('bravo')->getNormalized());
+
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testMergeException()
+    {
+        Collection::merge(array(null));
     }
 }

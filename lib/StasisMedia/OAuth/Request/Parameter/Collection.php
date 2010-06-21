@@ -257,8 +257,15 @@ class Collection
 
         foreach($args as $collection)
         {
-            if($collection !== null && $collection instanceof Collection)
+            if($collection !== null)
             {
+                if(($collection instanceof Collection) === false)
+                {
+                    throw new \Exception(sprintf(
+                            '$collection must be of type %s',
+                            __CLASS__
+                    ));
+                }
                 // If no collection set yet, use it
                 if($merged === null) { $merged = $collection; continue; }
 
