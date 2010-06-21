@@ -152,7 +152,7 @@ class Request implements RequestInterface
 
     public function getMissingParameters()
     {
-        return array_diff($this->_requiredOAuthParameters->getNames(), array_keys($this->getOAuthParameters()));
+        return array_diff($this->_requiredOAuthParameters, $this->getOAuthParameters()->getNames());
     }
 
     /**
