@@ -189,26 +189,6 @@ class Request implements RequestInterface
     }
 
     /**
-     * Recursively rawurldecode parameters
-     * 
-     * @param string $key
-     * @param array|string $value
-     */
-    private function _decodeParameters(&$value, &$key)
-    {
-        $key = rawurldecode($key);
-
-        if(is_array($value))
-        {
-            array_walk($value, array($this, '_decodeParameters'));
-        }
-        else
-        {
-            $value = rawurldecode($value);
-        }
-    }
-
-    /**
      * Set a single oauth_ parameter
      *
      * @param string $key
