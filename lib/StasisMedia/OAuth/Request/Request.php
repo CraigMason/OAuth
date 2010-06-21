@@ -176,7 +176,7 @@ class Request implements RequestInterface
      */
     public function getParameters()
     {
-        return Utility\Parameter::combineParameters(
+        return Parameter\Collection::merge(
             // 1. The query component
             $this->_getQueryParameters(),
             // 2. The Authorization header
