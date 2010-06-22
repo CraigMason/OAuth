@@ -25,7 +25,7 @@ use \StasisMedia\OAuth\Parameter;
  * @package     OAuth
  * @subpackage  Request
  */
-class Request implements RequestInterface
+abstract class Request implements RequestInterface
 {
     const GET  =   'GET';
     const POST =   'POST';

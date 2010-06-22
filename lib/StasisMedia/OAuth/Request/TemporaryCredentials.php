@@ -2,6 +2,7 @@
 namespace StasisMedia\OAuth\Request;
 
 use StasisMedia\OAuth\Credential\Consumer;
+use StasisMedia\OAuth\Credential\Exception;
 
 /**
  * OAuth 1.0 Temporary Credentials request
@@ -68,5 +69,60 @@ class TemporaryCredentials extends Request implements RequestInterface
             'oauth_callback',
             $this->_callbackUrl
         );
+    }
+
+    /**
+     *  Parses the HTTP response and extracts the required parameters
+     *
+     * @param HTTP $response
+     * @return \StasisMedia\OAuth\Parameter\Collection Parameter collection
+     */
+    public function parseResponse(\StasisMedia\OAuth\Response\HTTP $response)
+    {
+        $headers = $response->getHeaders();
+        $body = $response->getBody();
+
+        // Status?
+        if($headers['Status'] != '200 OK')
+        {
+            throw new Exception(sprintf(
+                'Response status %s',
+                $response['headers']['Status']
+            ));
+        }
+
+        // Content encoding?
+        if($headers['Content-Encoding'] !== 'application/x-www-form-urlencoded')
+        {
+            throw new Exception(
+                'Response Content-Encoding must be \'application/x-www-form-urlencoded\''
+            );
+        }
+
+        // See if all parameters exist
+        $collection = Parameter\Collection::fromQueryString($body);
+
+        if($collection->exists('oauth_token') === false) 
+            $this->_throwMissingParameterException('oauth_token');
+
+        if($collection->exists('oauth_token_secret') === false)
+            $this->_throwMissingParameterException('oauth_token_secret');
+
+        if($collection->exists('oauth_callback_confirmed') === false)
+            $this->_throwMissingParameterException('oauth_callback_confirmed');
+
+        return $collection;
+    }
+
+    /**
+     * Throws an Exception for a missing response parameter
+     * @param string $parameter The missing parameter
+     */
+    protected function _throwMissingParameterException($parameter)
+    {
+        throw new \Exception\Parameter(sprintf(
+            'Required response parameter absent: \'%s\'',
+            $parameter
+        ));
     }
 }

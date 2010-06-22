@@ -43,5 +43,12 @@ interface RequestInterface
     public function getMissingParameters();
     
     public function getBaseStringURI();
-    
+
+    /**
+     * @throws \Exception
+     * @param \StasisMedia\OAuth\Response\HTTP
+     * @return \StasisMedia\OAuth\Parameter\Collection
+     */
+    public function parseResponse(\StasisMedia\OAuth\Response\HTTP $response);
+   
 }
