@@ -5,6 +5,7 @@ use StasisMedia\OAuth\Connector;
 use StasisMedia\OAuth\Request;
 use StasisMedia\OAuth\Utility;
 use StasisMedia\OAuth\Parameter;
+use StasisMedia\OAuth\Response;
 
 /**
  * OAuth 1.0 HTTP Curl connector
@@ -78,9 +79,9 @@ class Curl implements Connector\ConnectorInterface
 
     /**
      * The response from the Provider;
-     * @var array
+     * @var Response\HTTP
      */
-    private $_response = array();
+    private $_response = null;
 
     /**
      * Set up the CURL handle
@@ -284,10 +285,13 @@ class Curl implements Connector\ConnectorInterface
         $response = curl_exec($this->_curlHandle);
 
         $responseParts = explode("\r\n\r\n", $response, 2);
-        $this->_response['header'] = $responseParts[0];
-        $this->_response['body'] =  $responseParts[1];
-        $this->_response['headers'] = $this->_parseHeader($responseParts[0]);
 
+        $this->_response = new Response\HTTP();
+        $this->_response->setHeaders($this->_parseHeader($responseParts[0]));
+        $this->_response->setBody($responseParts[1]);
+
+
+        //$this->_response['header'] = $responseParts[0];
         $this->_executed = true;
     }
 

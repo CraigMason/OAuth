@@ -153,10 +153,11 @@ class Client
     /**
      * Return the full response array from the connector
      *
+     * @throws \Exception\Parameter on missing response parameter
      * @return Array The response array (header, headers, body);
      */
     public function getResponse()
     {
-        return $this->_connector->getResponse();
+        return $this->_request->parseResponse($this->_connector->getResponse());
     }
 }
