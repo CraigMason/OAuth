@@ -90,8 +90,8 @@ class Client
     }
 
     /**
-     * Prepares the connector for execution. We provide 'prepare' as a seperate
-     * method, as users may with to utilise curl_multi or other connectors
+     * Prepares the connector for execution. We provide 'prepare' as a separate
+     * method, as users may wish to utilise curl_multi or other Connectors
      */
     public function prepare()
     {
