@@ -18,11 +18,7 @@ use StasisMedia\OAuth\Parameter;
  */
 class TokenCredentials extends Request implements RequestInterface
 {
-    /**
-     * A Consumer credential containing key and secret
-     * @var Consumer
-     */
-    private $_consumerCredentials;
+ 
 
     /**
      * Request token Credential containing token and secret
@@ -48,18 +44,6 @@ class TokenCredentials extends Request implements RequestInterface
         ));
     }
 
-    /**
-     * Set the Consumer Credential
-     * @param Consumer $consumerCredentials
-     */
-    public function setConsumerCredentials(Consumer $consumerCredentials)
-    {
-        $this->_consumerCredentials = $consumerCredentials;
-
-        $this->setOAuthParameters(array(
-            'oauth_consumer_key' => $this->_consumerCredentials->getKey()
-        ));
-    }
 
     /**
      * Set the TemporaryAccess credential

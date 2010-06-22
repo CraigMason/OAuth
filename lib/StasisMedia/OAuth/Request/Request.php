@@ -81,6 +81,11 @@ abstract class Request implements RequestInterface
      */
     private $_urlComponents;
 
+    /**
+     * A Consumer credential containing key and secret
+     * @var Consumer
+     */
+    private $_consumerCredentials;
 
     /**
      * The oauth parameters that do not exist elsewhere in the request
@@ -106,6 +111,19 @@ abstract class Request implements RequestInterface
         ));
 
         $this->_oauthParameters = new Parameter\Collection();
+    }
+
+    /**
+     * Set the Consumer Credential
+     * @param Consumer $consumerCredentials
+     */
+    public function setConsumerCredentials(\StasisMedia\OAuth\Credential\Consumer $consumerCredentials)
+    {
+        $this->_consumerCredentials = $consumerCredentials;
+
+        $this->setOAuthParameters(array(
+            'oauth_consumer_key' => $this->_consumerCredentials->getKey()
+        ));
     }
 
     /**
