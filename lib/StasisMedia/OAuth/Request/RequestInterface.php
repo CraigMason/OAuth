@@ -30,6 +30,9 @@ interface RequestInterface
     public function setPostParameters($querystring);
     public function getPostParameters();
 
+    /**
+     * @return \StasisMedia\OAuth\Parameter\Collection
+     */
     public function getParameters();
 
     public function hasRequiredParameters();
