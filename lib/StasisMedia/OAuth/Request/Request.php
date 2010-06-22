@@ -437,6 +437,37 @@ abstract class Request implements RequestInterface
         return $baseStringURI;
     }
 
-    
+
+    /**
+     * Throws an Exception for a missing response parameter
+     * @param string $parameter The missing parameter
+     */
+    protected function _throwMissingParameterException($parameter)
+    {
+        throw new \Exception\Parameter(sprintf(
+            'Required response parameter absent: \'%s\'',
+            $parameter
+        ));
+    }
+
+
+    /**
+     * Generates a 64-bit one-time nonce
+     *
+     * @return string The unique nonce
+     */
+    protected function _generateNonce()
+    {
+        return md5(uniqid(rand(), true));
+    }
+
+    /**
+     * Returns the current unix timestamp
+     * @return int Unix timestamp
+     */
+    protected function _generateTimestamp()
+    {
+        return time();
+    }
 
 }

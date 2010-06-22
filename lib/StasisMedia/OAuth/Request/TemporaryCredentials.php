@@ -137,15 +137,5 @@ class TemporaryCredentials extends Request implements RequestInterface
         return $collection;
     }
 
-    /**
-     * Throws an Exception for a missing response parameter
-     * @param string $parameter The missing parameter
-     */
-    protected function _throwMissingParameterException($parameter)
-    {
-        throw new \Exception\Parameter(sprintf(
-            'Required response parameter absent: \'%s\'',
-            $parameter
-        ));
-    }
+
 }
