@@ -10,13 +10,15 @@ require_once $base . '/Parameter/Collection.php';
 require_once $base . '/Request/RequestInterface.php';
 require_once $base . '/Request/Request.php';
 
+require_once __DIR__ . '/MockRequest.php';
+
 use StasisMedia\OAuth\Exception\ParameterException;
 
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
     public function testRequiredOAuthParameters()
     {
-        $request = new Request();
+        $request = new MockRequest();
 
         $this->assertEquals(false, $request->hasRequiredParameters());
 
@@ -31,7 +33,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPostParameters()
     {
-        $request = new Request();
+        $request = new MockRequest();
         $string = "a=x%20y&a=x%21y";
         $request->setPostParameters($string);
 
@@ -43,7 +45,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetParameters()
     {
-        $request = new Request();
+        $request = new MockRequest();
         $request->setUrl('http://example.com/?a=1&b=2');
 
         $string = "a=3&b=4";
@@ -65,7 +67,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     public function testBaseStringURI()
     {
         $url = 'http://EXAMPLE.COM:80/r%20v/X?id=123';
-        $request = new Request();
+        $request = new MockRequest();
         $request->setUrl($url);
 
         $this->assertEquals('http://example.com/r%20v/X', $request->getBaseStringURI());
