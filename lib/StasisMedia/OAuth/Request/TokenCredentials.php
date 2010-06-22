@@ -22,7 +22,7 @@ class TokenCredentials extends Request implements RequestInterface
 
     /**
      * Request token Credential containing token and secret
-     * @var \StasisMedia\OAuth\Credential\Request
+     * @var \StasisMedia\OAuth\Credential\TemporaryAccess
      */
     private $_temporaryAccessCredentials;
 
