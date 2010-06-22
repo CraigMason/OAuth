@@ -196,6 +196,8 @@ class Request implements RequestInterface
      */
     public function setOAuthParameter($key, $value)
     {
+        if($key === 'oauth_signature') return;
+        
         $this->setOAuthParameters(array($key => $value));
     }
 
@@ -208,6 +210,7 @@ class Request implements RequestInterface
     {
         foreach($parameters as $key => $value)
         {
+            if($key === 'oauth_signature') continue;
             $this->_oauthParameters->reset($key, $value);
         }
     }
