@@ -25,7 +25,7 @@ use \StasisMedia\OAuth\Parameter;
  * @package     OAuth
  * @subpackage  Request
  */
-class Request implements RequestInterface
+abstract class Request implements RequestInterface
 {
     const GET  =   'GET';
     const POST =   'POST';
@@ -81,6 +81,11 @@ class Request implements RequestInterface
      */
     private $_urlComponents;
 
+    /**
+     * A Consumer credential containing key and secret
+     * @var Consumer
+     */
+    private $_consumerCredentials;
 
     /**
      * The oauth parameters that do not exist elsewhere in the request
@@ -106,6 +111,19 @@ class Request implements RequestInterface
         ));
 
         $this->_oauthParameters = new Parameter\Collection();
+    }
+
+    /**
+     * Set the Consumer Credential
+     * @param Consumer $consumerCredentials
+     */
+    public function setConsumerCredentials(\StasisMedia\OAuth\Credential\Consumer $consumerCredentials)
+    {
+        $this->_consumerCredentials = $consumerCredentials;
+
+        $this->setOAuthParameters(array(
+            'oauth_consumer_key' => $this->_consumerCredentials->getKey()
+        ));
     }
 
     /**
@@ -437,6 +455,37 @@ class Request implements RequestInterface
         return $baseStringURI;
     }
 
-    
+
+    /**
+     * Throws an Exception for a missing response parameter
+     * @param string $parameter The missing parameter
+     */
+    protected function _throwMissingParameterException($parameter)
+    {
+        throw new \Exception\Parameter(sprintf(
+            'Required response parameter absent: \'%s\'',
+            $parameter
+        ));
+    }
+
+
+    /**
+     * Generates a 64-bit one-time nonce
+     *
+     * @return string The unique nonce
+     */
+    protected function _generateNonce()
+    {
+        return md5(uniqid(rand(), true));
+    }
+
+    /**
+     * Returns the current unix timestamp
+     * @return int Unix timestamp
+     */
+    protected function _generateTimestamp()
+    {
+        return time();
+    }
 
 }

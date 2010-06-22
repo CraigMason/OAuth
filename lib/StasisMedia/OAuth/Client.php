@@ -73,24 +73,7 @@ class Client
         $this->_request->setOAuthParameter('oauth_version', '1.0');
     }
 
-    /**
-     * Generates a 64-bit one-time nonce
-     *
-     * @return string The unique nonce
-     */
-    private function _generateNonce()
-    {
-        return md5(uniqid(rand(), true));
-    }
 
-    /**
-     * Returns the current unix timestamp
-     * @return int Unix timestamp
-     */
-    private function _generateTimestamp()
-    {
-        return time();
-    }
 
     /**
      * We allow timestamps to be set, as the OAuth spec does not excplicitly
@@ -113,10 +96,7 @@ class Client
     public function prepare()
     {
         // Prepare the request
-        $this->_request->setOAuthParameters(array(
-            'oauth_nonce' => $this->_generateNonce(),
-            'oauth_timestamp' => $this->_generateTimestamp()
-        ));
+        $this->_request->prepare();
 
         // Generate the signature
         $signature = $this->_signature->generateSignature();
@@ -153,10 +133,11 @@ class Client
     /**
      * Return the full response array from the connector
      *
+     * @throws \Exception\Parameter on missing response parameter
      * @return Array The response array (header, headers, body);
      */
     public function getResponse()
     {
-        return $this->_connector->getResponse();
+        return $this->_request->parseResponse($this->_connector->getResponse());
     }
 }

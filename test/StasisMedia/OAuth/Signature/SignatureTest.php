@@ -10,6 +10,8 @@ require_once $base . '/Parameter/Collection.php';
 require_once $base . '/Request/RequestInterface.php';
 require_once $base . '/Request/Request.php';
 
+require_once __DIR__ . '/../Request/MockRequest.php';
+
 require_once $base . '/Signature/SignatureInterface.php';
 require_once $base . '/Signature/Signature.php';
 
@@ -24,7 +26,7 @@ class SignatureTest extends \PHPUnit_Framework_TestCase
         //die(rawurldecode('POST&http%3A%2F%2Fexample.com%2Frequest&a2%3Dr%2520b%26a3%3D2%2520q%26a3%3Da%26b5%3D%253D%25253D%26c%2540%3D%26c2%3D%26oauth_consumer_key%3D9djdj82h48djs9d2%26oauth_nonce%3D7d8f3e4a%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131201%26oauth_token%3Dkkk9d7dh3k39sjv7'));
 
 
-        $request = new Request\Request();
+        $request = new Request\MockRequest();
         $signature = new MockSignature($request);
 
         $request->setUrl('http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b');

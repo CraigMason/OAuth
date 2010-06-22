@@ -9,6 +9,7 @@ require_once $base . '/Parameter/Parameter.php';
 require_once $base . '/Parameter/Collection.php';
 require_once $base . '/Request/RequestInterface.php';
 require_once $base . '/Request/Request.php';
+require_once __DIR__ . '/../Request/MockRequest.php';
 
 require_once $base . '/Credential/Consumer.php';
 require_once $base . '/Credential/Access.php';
@@ -25,7 +26,7 @@ class HMAC_SHA1Test extends \PHPUnit_Framework_TestCase
 {
     public function testSignatureMethod()
     {
-        $request = new Request\Request();
+        $request = new Request\MockRequest();
         $signature = new HMAC_SHA1($request);
 
         $this->assertEquals('HMAC-SHA1', $signature->getSignatureMethod());
@@ -34,7 +35,7 @@ class HMAC_SHA1Test extends \PHPUnit_Framework_TestCase
     public function testGenerateSignature()
     {
 
-        $request = new Request\Request();
+        $request = new Request\MockRequest();
         $signature = new HMAC_SHA1($request);
 
         $consumer = new Credential\Consumer();

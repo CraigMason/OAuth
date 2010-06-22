@@ -97,6 +97,23 @@ class Parameter implements \Iterator
     }
 
     /**
+     *
+     * @return Value
+     */
+    public function getFirstValue()
+    {
+        return reset($this->_values);
+    }
+
+    /**
+     * @return Value
+     */
+    public function getLastValue()
+    {
+        return end($this->_values);
+    }
+
+    /**
      * Returns the normalised string for this parameter. This differs from
      * a traditional 'join', as text values will have been converted into UTF-8
      * first, which may not be expected.
