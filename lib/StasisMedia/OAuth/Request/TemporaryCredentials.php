@@ -3,6 +3,7 @@ namespace StasisMedia\OAuth\Request;
 
 use StasisMedia\OAuth\Credential\Consumer;
 use StasisMedia\OAuth\Credential\Exception;
+use StasisMedia\OAuth\Parameter;
 
 /**
  * OAuth 1.0 Temporary Credentials request
@@ -85,19 +86,23 @@ class TemporaryCredentials extends Request implements RequestInterface
         // Status?
         if($headers['Status'] != '200 OK')
         {
-            throw new Exception(sprintf(
+            throw new \Exception(sprintf(
                 'Response status %s',
                 $response['headers']['Status']
             ));
         }
 
-        // Content encoding?
-        if($headers['Content-Encoding'] !== 'application/x-www-form-urlencoded')
+        // Content type?
+        /*
+        if(isset($headers['Content-Type']) == false
+           || $headers['Content-Type'] !== 'application/x-www-form-urlencoded')
         {
-            throw new Exception(
-                'Response Content-Encoding must be \'application/x-www-form-urlencoded\''
-            );
+            throw new \Exception(sprintf(
+                'Incorrect header \'Content-Type\'. Expected: %s, actual: %s',
+                'application/x-www-form-urlencoded', $headers['Content-Type']
+            ));
         }
+         */
 
         // See if all parameters exist
         $collection = Parameter\Collection::fromQueryString($body);
