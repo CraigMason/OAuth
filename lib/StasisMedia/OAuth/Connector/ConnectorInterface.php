@@ -18,7 +18,8 @@ interface ConnectorInterface
 {
     public function setTransmissionMethod($method);
 
-    public function setPostParameters(array $postParameters, $merge=true);
+    public function setPostParameters($postParameters, $merge=true);
+    public function setOAuthSignature($signature);
     public function prepare(Request\RequestInterface $request);
     public function execute();
     public function getResponse();    
