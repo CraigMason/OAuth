@@ -52,8 +52,7 @@ class TemporaryCredentials extends Request implements RequestInterface
 
         
         $this->setOAuthParameter(
-            'oauth_consumer_key',
-            $this->_consumerCredentials->getKey()
+            'oauth_consumer_key',$this->_consumerCredentials->getKey()
         );
     }
 
