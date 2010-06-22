@@ -22,6 +22,12 @@ class Consumer
      */
     private $_secret;
 
+
+    public function __construct($key = null, $secret = null)
+    {
+        $this->_key = $key;
+        $this->_secret = $secret;
+    }
     
     /**
      * Consumer key

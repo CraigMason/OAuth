@@ -23,6 +23,13 @@ class Access
     private $_secret;
 
 
+    public function __construct($token = null, $secret = null)
+    {
+        $this->_token = $token;
+        $this->_secret = $secret;
+    }
+
+
     /**
      * Access token
      * @return string
