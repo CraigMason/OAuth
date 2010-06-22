@@ -41,6 +41,6 @@ class HTTP
 
     public function getBody()
     {
-        return $body;
+        return $this->_body;
     }
 }
