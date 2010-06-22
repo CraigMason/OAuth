@@ -73,6 +73,24 @@ class TemporaryCredentials extends Request implements RequestInterface
     }
 
     /**
+     * Prepare for execution
+     */
+    public function prepare()
+    {
+        $oauthParameters = $this->getOAuthParameters();
+
+        if($oauthParameters->exists('oauth_none') === false)
+        {
+            $this->setOAuthParameter('oauth_nonce', $this->_generateNonce());
+        }
+
+        if($oauthParameters->exists('oauth_timestamp') === false)
+        {
+            $this->setOAuthParameter('oauth_timestamp', $this->_generateTimestamp());
+        }
+    }
+
+    /**
      *  Parses the HTTP response and extracts the required parameters
      *
      * @param HTTP $response

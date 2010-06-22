@@ -44,6 +44,8 @@ interface RequestInterface
     
     public function getBaseStringURI();
 
+    public function prepare();
+
     /**
      * @throws \Exception
      * @param \StasisMedia\OAuth\Response\HTTP
