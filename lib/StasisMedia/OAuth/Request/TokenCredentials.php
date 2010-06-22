@@ -129,25 +129,31 @@ class TokenCredentials extends Request implements RequestInterface
         return $collection;
     }
 
+    /**
+     * Add the nonce, timestamp and verifier to the parameter list, if they
+     * have not already been set externally
+     */
     public function prepare()
     {
         $oauthParameters = $this->getOAuthParameters();
 
+        // Nonce
         if($oauthParameters->exists('oauth_none') === false)
         {
             $this->setOAuthParameter('oauth_nonce', $this->_generateNonce());
         }
 
+        // timestamp
         if($oauthParameters->exists('oauth_timestamp') === false)
         {
             $this->setOAuthParameter('oauth_timestamp', $this->_generateTimestamp());
         }
-        
+
+        // Verifier
         if($oauthParameters->exists('oauth_verifier') === false)
         {
             $this->setOAuthParameter('oauth_verifier', $this->_oauthVerifier);
         }
-
 
     }
 
