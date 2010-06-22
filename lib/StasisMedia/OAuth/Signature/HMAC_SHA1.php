@@ -87,7 +87,7 @@ class HMAC_SHA1 extends Signature implements SignatureInterface
     private function _generateSignature()
     {
         // Get the base string
-        $baseString = $this->_getBaseString();
+        $baseString = $this->getBaseString();
 
         $keyString = $this->_consumerCredential->getSecret() . '&';
         if(null !== $this->_accessCredential)
