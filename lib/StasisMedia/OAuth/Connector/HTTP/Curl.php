@@ -4,6 +4,7 @@ namespace StasisMedia\OAuth\Connector\HTTP;
 use StasisMedia\OAuth\Connector;
 use StasisMedia\OAuth\Request;
 use StasisMedia\OAuth\Utility;
+use StasisMedia\OAuth\Parameter;
 
 /**
  * OAuth 1.0 HTTP Curl connector
@@ -46,9 +47,9 @@ class Curl implements Connector\ConnectorInterface
 
     /**
      * Post parameters to include in the request
-     * @var array
+     * @var Parameter\Collection
      */
-    private $_postParameters = array();
+    private $_postParameters;
 
     /**
      * Request
@@ -68,6 +69,13 @@ class Curl implements Connector\ConnectorInterface
      */
     private $_executed = false;
 
+
+    /**
+     * OAuth signature (to be added as oauth_signatore="xxx")
+     * @var string
+     */
+    private $_oauthSignature;
+
     /**
      * The response from the Provider;
      * @var array
@@ -80,6 +88,7 @@ class Curl implements Connector\ConnectorInterface
     public function __construct()
     {
         $this->_curlHandle = curl_init();
+        $this->_postParameters = new Parameter\Collection();
     }
 
     /**
@@ -104,11 +113,16 @@ class Curl implements Connector\ConnectorInterface
      * @param array $postParameters
      * @param bool $merge
      */
-    public function setPostParameters(array $postParameters, $merge=true)
+    public function setPostParameters($postParameters, $merge=true)
     {
+        if(!isset($postParameters) || (!$postParameters instanceof Parameter\Collection))
+        {
+            return;
+        }
+
         if($merge === true)
         {
-            $this->_postParameters = Utility\Parameter::combineParameters(
+            $this->_postParameters = Parameter\Collection::merge(
                     $postParameters,
                     $this->_postParameters
             );
@@ -136,6 +150,11 @@ class Curl implements Connector\ConnectorInterface
                 throw new Exception('Invalid parameter transmission method');
                 break;
         }
+    }
+
+    public function setOAuthSignature($signature)
+    {
+        $this->_oauthSignature = $signature;
     }
 
     /**
@@ -171,7 +190,7 @@ class Curl implements Connector\ConnectorInterface
         if($this->_request->getRequestMethod() == 'POST')
         {
             $options[\CURLOPT_POST] = true;
-            $options[\CURLOPT_POSTFIELDS] = Utility\Parameter::buildQueryString($this->_postParameters);
+            $options[\CURLOPT_POSTFIELDS] = $this->_postParameters->getNormalized();
         }
 
         $this->setCurlOptions($options);
@@ -215,12 +234,17 @@ class Curl implements Connector\ConnectorInterface
     private function _addOAuthParametersAuthorizationHeader()
     {
         $parameters = $this->_request->getOAuthParameters();
+        $parameters->add('oauth_signature', $this->_oauthSignature );
         
         $headerParts = array();
 
-        foreach($parameters as $key => $value)
+        foreach($parameters->getAll() as $parameter)
         {
-            $headerParts[] = rawurlencode($key)
+            /* @var $parameter Parameter\Parameter */
+            $name = $parameter->getName();
+            $value = (string) reset($parameter->getValues());
+
+            $headerParts[] = rawurlencode($name)
                              . '="' . rawurlencode($value) . '"';
         }
 
@@ -238,10 +262,11 @@ class Curl implements Connector\ConnectorInterface
         }
         
         $oAuthParameters = $this->_request->getOAuthParameters();
-
-        $this->_postParameters = Utility\Parameter::combineParameters(
+        $oAuthParameters->add('oauth_signature', $this->_oauthSignature );
+        
+        $this->_postParameters = Parameter\Collection::merge(
             $this->_postParameters,
-            $oAuthParameters
+            $oAuthParameters            
         );
 
     }

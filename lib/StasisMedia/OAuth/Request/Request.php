@@ -2,6 +2,7 @@
 namespace StasisMedia\OAuth\Request;
 
 use StasisMedia\OAuth\Utility;
+use \StasisMedia\OAuth\Parameter;
 
 /**
  * OAuth 1.0 Request
@@ -83,8 +84,9 @@ class Request implements RequestInterface
 
     /**
      * The oauth parameters that do not exist elsewhere in the request
+     * @var Parameter\Collection
      */
-    private $_oauthParameters = array();
+    private $_oauthParameters;
 
     /**
      * Adds the required and optional parameters for all requests
@@ -102,6 +104,8 @@ class Request implements RequestInterface
             'oauth_token',
             'oauth_version'
         ));
+
+        $this->_oauthParameters = new Parameter\Collection();
     }
 
     /**
@@ -148,7 +152,7 @@ class Request implements RequestInterface
 
     public function getMissingParameters()
     {
-        return array_diff($this->_requiredOAuthParameters, array_keys($this->getOAuthParameters()));
+        return array_diff($this->_requiredOAuthParameters, $this->getOAuthParameters()->getNames());
     }
 
     /**
@@ -168,11 +172,11 @@ class Request implements RequestInterface
      * Parameters should all be decoded, according to
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.3
      *
-     * @return array
+     * @return Parameter\Collection
      */
     public function getParameters()
     {
-        return Utility\Parameter::combineParameters(
+        return Parameter\Collection::merge(
             // 1. The query component
             $this->_getQueryParameters(),
             // 2. The Authorization header
@@ -185,26 +189,6 @@ class Request implements RequestInterface
     }
 
     /**
-     * Recursively rawurldecode parameters
-     * 
-     * @param string $key
-     * @param array|string $value
-     */
-    private function _decodeParameters(&$value, &$key)
-    {
-        $key = rawurldecode($key);
-
-        if(is_array($value))
-        {
-            array_walk($value, array($this, '_decodeParameters'));
-        }
-        else
-        {
-            $value = rawurldecode($value);
-        }
-    }
-
-    /**
      * Set a single oauth_ parameter
      *
      * @param string $key
@@ -212,23 +196,29 @@ class Request implements RequestInterface
      */
     public function setOAuthParameter($key, $value)
     {
+        if($key === 'oauth_signature') return;
+        
         $this->setOAuthParameters(array($key => $value));
     }
 
     /**
-     * Set an array of oauth_ parameters
+     * Set an array of oauth_ parameters, overwriting old values
      *
      * @param array $parameters
      */
     public function setOAuthParameters(array $parameters)
     {
-        $this->_oauthParameters = array_merge($this->_oauthParameters, $parameters);
+        foreach($parameters as $key => $value)
+        {
+            if($key === 'oauth_signature') continue;
+            $this->_oauthParameters->reset($key, $value);
+        }
     }
 
     /**
      * Return the oauth parameters
      *
-     * @return array
+     * @return Parameter\Collection
      */
     public function getOAuthParameters()
     {
@@ -304,30 +294,20 @@ class Request implements RequestInterface
      * Set the entity-body to a query string derived from the parameters,
      * and set the 'Content-Type' header to 'application/x-www-form-urlencoded'
      *
-     * @param array $parameters
-     * @param bool Wether the supplied parameters should be merged with existing
+     * @param string $queryString
      */
-    public function setPostParameters(array $parameters, $merge = true)
+    public function setPostParameters($queryString)
     {
-        if($merge === true)
-        {
-            // Combine the incoming parameters with the existing post parameters
-            $postParameters = Utility\Parameter::combineParameters(
-                $this->getPostParameters(),
-                $parameters
-            );
-        } else {
-            $postParameters = $parameters;
-        }
-
         $this->setEntityBody(
-            Utility\Parameter::buildQueryString($postParameters),
+            $queryString,
             'application/x-www-form-urlencoded'
         );
     }
 
     /**
      * Returns the parameters currently in the entity body as a post request
+     *
+     * @return Parameter\Collection
      */
     public function getPostParameters()
     {
@@ -361,20 +341,13 @@ class Request implements RequestInterface
      * Get the key/value pairs of parameters supplied in the query string
      * of the URL
      *
-     * @return array rawurldecoded key/value pairs
+     * @return Parameter\Collection rawurldecoded
      */
     private function _getQueryParameters()
     {
-        if(array_key_exists('query', $this->_urlComponents) === false) return array();
+        if(array_key_exists('query', $this->_urlComponents) === false) return null;
 
-        $queryString = $this->_urlComponents['query'];
-
-        $parameters = self::parseQueryParameters($queryString);
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromQueryString($this->_urlComponents['query']);
     }
 
     /**
@@ -388,28 +361,9 @@ class Request implements RequestInterface
      */
     private function _getAuthorizationHeaderParameters()
     {
-        if(array_key_exists('Authorization', $this->_headers) === false) return array();
+        if(array_key_exists('Authorization', $this->_headers) === false) return null;
 
-        // Get the header, and remove the 'OAuth ' auth-scheme part
-        $header = preg_replace('/OAuth\s/', '', $this->_headers['Authorization']);
-
-        $parts = explode(',', $header);
-
-        $parameters = array();
-        foreach($parts as $part)
-        {
-            $pair = explode('=', $part, 2);
-
-            // Do NOT include the 'realm' parameter
-            if($pair[0] === 'realm') continue;
-
-            $parameters[$pair[0]] = trim($pair[1], '"');
-        }
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromAuthorizationHeader($this->_headers['Authorization']);
     }
 
     /**
@@ -420,27 +374,17 @@ class Request implements RequestInterface
      *
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
      *
-     * @return array rawurlencoded key/value pairs
+     * @return Parameter\Collection
      */
     private function _getEntityBodyParameters()
     {
         // If there is no entity body, return an empty array
-        if(empty($this->_entityBody) === true) return array();
+        if(empty($this->_entityBody) === true) return null;
 
-        /*
-         * If the 'Content-Type' header is not 'application/x-www-form-urlencoded'
-         * return an empty array
-         */
-        if(array_key_exists('Content-Type', $this->_headers) === false) return array();
-        if($this->_headers['Content-Type'] !== 'application/x-www-form-urlencoded') return array();
+        // If no 'Content-Type' header
+        if(array_key_exists('Content-Type', $this->_headers) === false) return null;
 
-        // If we are here, the header is intact
-        $parameters = self::parseQueryParameters($this->_entityBody);
-
-        // rawurldecode
-        array_walk($parameters, array($this, '_decodeParameters'));
-
-        return $parameters;
+        return Parameter\Collection::fromEntityBody($this->_entityBody, $this->_headers['Content-Type']);
     }
 
     /**
@@ -493,51 +437,6 @@ class Request implements RequestInterface
         return $baseStringURI;
     }
 
-    /**
-     * Parses the query-string of a URI into an associative array. Duplicate
-     * keys will transform the parameter into an array
-     *
-     * @see Request::buildHttpQuery
-     *
-     * @param string $parameters
-     */
-    public static function parseQueryParameters($queryString)
-    {
-        // If there is nothing to parse, return an empty array
-        if( isset($queryString) === false || $queryString === false) return array();
-
-        // Resulting parameters
-        $parameters = array();
-
-        // Split the key pairs with an ampersand
-        $pairs = explode('&', $queryString);
-
-        foreach($pairs as $pair)
-        {
-            $split = explode('=', $pair, 2);
-
-            // TODO: Can array keys be utf-8 strings?
-            $parameter = rawurldecode($split[0]);
-            // Value may be blank
-            $value = isset($split[1]) ? rawurldecode($split[1]) : '';
-
-            // If the key exists, it must be appended to the list
-            if(array_key_exists($parameter, $parameters))
-            {
-                if(is_scalar($parameters[$parameter]))
-                {
-                    $parameters[$parameter] = array($parameters[$parameter]);
-                }
-                $parameters[$parameter][] = $value;
-            }
-            // Paramater does not exist. Add it to the list normally
-            else
-            {
-                $parameters[$parameter] = $value;
-            }
-        }
-
-        return $parameters;
-    }
+    
 
 }

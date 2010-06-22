@@ -25,11 +25,18 @@ interface RequestInterface
 
     public function setOAuthParameter($parameter, $value);
     public function setOAuthParameters(array $parameters);
+
+    /**
+     * @return \StasisMedia\OAuth\Parameter\Collection
+     */
     public function getOAuthParameters();
 
-    public function setPostParameters(array $parameters, $merge = true);
+    public function setPostParameters($querystring);
     public function getPostParameters();
 
+    /**
+     * @return \StasisMedia\OAuth\Parameter\Collection
+     */
     public function getParameters();
 
     public function hasRequiredParameters();
