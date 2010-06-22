@@ -3,6 +3,7 @@ namespace StasisMedia\OAuth\Request;
 
 use StasisMedia\OAuth\Credential\Consumer;
 use StasisMedia\OAuth\Credential\Exception;
+use StasisMedia\OAuth\Request\AccessResource;
 use StasisMedia\OAuth\Parameter;
 
 /**
@@ -16,15 +17,8 @@ use StasisMedia\OAuth\Parameter;
  * @package     OAuth
  * @subpackage  Request
  */
-class TokenCredentials extends Request implements RequestInterface
+class TokenCredentials extends AccessResource implements RequestInterface
 {
- 
-
-    /**
-     * Request token Credential containing token and secret
-     * @var \StasisMedia\OAuth\Credential\TemporaryAccess
-     */
-    private $_temporaryAccessCredentials;
 
     /**
      * oauth_verifier sent during token request stage
@@ -42,21 +36,6 @@ class TokenCredentials extends Request implements RequestInterface
         $this->addRequiredOAuthParameters(array(
             'oauth_verifier'
         ));
-    }
-
-
-    /**
-     * Set the TemporaryAccess credential
-     * @param TemporaryAccess $requestCredentials
-     */
-    public function setTemporaryAccessCredentials(\StasisMedia\OAuth\Credential\TemporaryAccess $accessCredentials)
-    {
-        $this->_temporaryAccessCredentials = $accessCredentials;
-
-        $this->setOAuthParameters(array(
-            'oauth_token' => $this->_temporaryAccessCredentials->getToken()
-        ));
-
     }
 
     /**
