@@ -1,114 +1,54 @@
 <?php
-Namespace StasisMedia\OAuth\Signature;
+namespace StasisMedia\OAuth\Signature;
 
-use StasisMedia\OAuth\Exception;
 use StasisMedia\OAuth\Request;
 use StasisMedia\OAuth\Credential;
 
-/**
- * OAuth 1.0 HMAC SHA1 Signature
- * http://tools.ietf.org/html/rfc5849#section-3.4.2
- *
- * @author      Craig Mason <craig.mason@stasismedia.com>
- * @package     OAuth
- * @subpackage  Signature
- */
-class HMAC_SHA1 extends Signature implements SignatureInterface
+class HMAC_SHA1 implements SignatureInterface
 {
     const SIGNATURE_METHOD = 'HMAC-SHA1';
-
     /**
      *
-     * @var Credential\Consumer
+     * @var RequestInterface
      */
-    private $_consumerCredential;
+    private $request;
 
     /**
      *
+     * @var Consumer
+     */
+    private $consumer;
+
+    /**
      * @var Credential\Access
      */
-    private $_accessCredential;
-    
+    private $accessCredential;
 
-    public function __construct(Request\RequestInterface $request)
+    public function __construct(Request\RequestInterface $request,
+                                Credential\Consumer $consumer,
+                                Credential\Access $accessCredential = null)
+
     {
-        parent::__construct($request);
+        $this->request = $request;
+        $this->consumer = $consumer;
+        $this->accessCredential = $accessCredential;
     }
 
     /**
-     * Returns the 'signature method' for use in oauth_signature_method
-     * 
-     * @return string the oauth_signature_method
-     */
-    public function getSignatureMethod()
-    {
-        return self::SIGNATURE_METHOD;
-    }
-
-    /**
-     * Generates the signature for the request.
-     *
-     * Will throw an Exception if any required parameter or Credential
-     * is missing
-     * 
-     * @return string The base64 encoded HMAC-SHA1 signature
+     * Generate the oauth_signature parameter
+     * @return string
      */
     public function generateSignature()
     {
-        // Check for any missing parameters
-        if(false === $this->_request->hasRequiredParameters())
+        $keyString = rawurlencode($this->consumer->getSecret()) . '&';
+
+        if($this->accessCredential !== null)
         {
-            $missing = $this->_request->getMissingParameters();
-            throw new Exception\ParameterException(
-                'Missing required oauth_ parameters:'
-                . rtrim(implode(', ', $missing), ', ')
-            );
+            $keyString .= \rawurlencode($this->accessCredential->getSecret());
         }
 
-        // Check if the Consumer Credential is missing
-        if(null == $this->_consumerCredential)
-        {
-            throw new \Exception('HMAC_SHA1 requires a Consumer Credential');
-        }
+        $baseString = $this->request->getBaseString(self::SIGNATURE_METHOD);
 
-        return $this->_generateSignature();
+        return \base64_encode(hash_hmac('sha1', $baseString, $keyString, true));
     }
-
-    /**
-     * Performs the actual signature generation
-     */
-    private function _generateSignature()
-    {
-        // Get the base string
-        $baseString = $this->getBaseString();
-
-        $keyString = $this->_consumerCredential->getSecret() . '&';
-        if(null !== $this->_accessCredential)
-        {
-            $keyString .= $this->_accessCredential->getSecret();
-        }
-
-        return base64_encode(hash_hmac('sha1', $baseString, $keyString, true));
-    }
-
-    /**
-     * Set the Consumer Credential
-     *
-     * @param Consumer $consumerCredential
-     */
-    public function setConsumerCredential(Credential\Consumer $consumerCredential)
-    {
-        $this->_consumerCredential = $consumerCredential;
-    }
-
-    /**
-     * Set the Access Credential
-     * 
-     * @param Access $accessCredential
-     */
-    public function setAccessCredential(Credential\Access $accessCredential)
-    {
-        $this->_accessCredential = $accessCredential;
-    }
-
 }

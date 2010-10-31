@@ -2,66 +2,36 @@
 namespace StasisMedia\OAuth\Credential;
 
 /**
- * OAuth 1.0 Consumer credential
+ * Consumer (Client Credential):
+ *   A website or application that uses OAuth to access the Service Provider
+ *   on behalf of the User.
  *
- * @author      Craig Mason <craig.mason@stasismedia.com>
- * @package     OAuth
- * @subpackage  Credential
+ * The Consumer key and secret are used in all stages of the OAuth
+ * authorization and consumption stages
+ *
+ * @author  Craig Mason <craig.mason@stasismedia.com>
+ * @package OAuth
+ * @version 1.0
  */
-class Consumer
+class Consumer extends Credential
 {
-    /**
-     * Consumer key
-     * @var string
-     */
-    private $_key;
-
-    /**
-     * Consumer secret
-     * @var string
-     */
-    private $_secret;
-
-
-    public function __construct($key = null, $secret = null)
+    public function __construct($key, $secret)
     {
-        $this->_key = $key;
-        $this->_secret = $secret;
+        $this->key = $key;
+        $this->secret = $secret;
     }
-    
+
     /**
-     * Consumer key
-     * @return string
+     * @var String
+     */
+    private $key;
+
+    /**
+     * @return string Consumer key
      */
     public function getKey()
     {
-        return $this->_key;
+        return $this->key;
     }
 
-    /**
-     * Consumer key
-     * @param string $key
-     */
-    public function setKey($key)
-    {
-        $this->_key = $key;
-    }
-
-    /**
-     * Consumer secret
-     * @return string
-     */
-    public function getSecret()
-    {
-        return $this->_secret;
-    }
-
-    /**
-     * Consumer secret
-     * @param string $secret
-     */
-    public function setSecret($secret)
-    {
-        $this->_secret = $secret;
-    }
 }

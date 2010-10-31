@@ -2,67 +2,15 @@
 namespace StasisMedia\OAuth\Credential;
 
 /**
- * OAuth 1.0 Access credential
+ * Access(Token Credential):
+ *   An authorized Token and Secret issued by the Service Provider
  *
- * @author      Craig Mason <craig.mason@stasismedia.com>
- * @package     OAuth
- * @subpackage  Credential
+ * The Access Credential is used to access a Protected Resources on the server
+ * on behalf of the user
+ *
+ * @author  Craig Mason <craig.mason@stasismedia.com>
+ * @package OAuth
+ * @version 1.0
  */
-class Access
-{
-    /**
-     * Access token
-     * @var string
-     */
-    private $_token;
-
-    /**
-     * Access secret
-     * @var string
-     */
-    private $_secret;
-
-
-    public function __construct($token = null, $secret = null)
-    {
-        $this->_token = $token;
-        $this->_secret = $secret;
-    }
-
-
-    /**
-     * Access token
-     * @return string
-     */
-    public function getToken()
-    {
-        return $this->_token;
-    }
-
-    /**
-     * Access token
-     * @param string $token
-     */
-    public function setToken($token)
-    {
-        $this->_token = $token;
-    }
-
-    /**
-     * Access secret
-     * @return string
-     */
-    public function getSecret()
-    {
-        return $this->_secret;
-    }
-
-    /**
-     * Access secret
-     * @param string $secret
-     */
-    public function setSecret($secret)
-    {
-        $this->_secret = $secret;
-    }
-}
+class Access extends Token
+{}

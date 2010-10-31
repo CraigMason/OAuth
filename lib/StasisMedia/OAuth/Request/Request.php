@@ -1,417 +1,266 @@
 <?php
 namespace StasisMedia\OAuth\Request;
 
-use StasisMedia\OAuth\Utility;
-use \StasisMedia\OAuth\Parameter;
+use StasisMedia\OAuth\Parameter;
+use StasisMedia\OAuth\Credential;
 
-/**
- * OAuth 1.0 Request
- *
- * Models the components of a HTTP message that are used when sending an OAuth
- * signed request. Whilst this class models a number of elements of a HTTP
- * message, it is only concerned with holding parameters, headers and other
- * entities for the purpose of generating a base string.
- *
- * StasisMedia\OAuth\Client can create a CURL-based HTTP request from this
- * model.
- *
- * The term 'Request' is used, because it is representative of both a 'HTTP
- * Message' and a 'OAuth Request'.
- *
- * Will set all default REQUIRED and OPTIONAL parameters according to
- * http://tools.ietf.org/html/rfc5849#section-3
- *
- * @author      Craig Mason <craig.mason@stasismedia.com>
- * @package     OAuth
- * @subpackage  Request
- */
 abstract class Request implements RequestInterface
 {
-    const GET  =   'GET';
-    const POST =   'POST';
-    const PUT  =   'PUT';
-    const DELETE = 'DELETE';
+    protected $url;
+    protected $verb;
 
-    /*
-     * A number of parameters are USUALLY required, but when using PLAINTEXT
-     * signature method, many can be excluded.
+    /**
+     * Strictly we are looking for an 'entity body' combined with the rules in
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1, but this
+     * just equates to post parameters
      *
-     * http://tools.ietf.org/html/rfc5849#section-3.1
+     * @var Array of StasisMedia\OAuth\Parameter\Parameter
      */
+    protected $postParameters = array();
 
     /**
-     * Required OAuth parameters for the request
+     * Array of StasisMedia\OAuth\Parameter\Parameter
      * @var array
      */
-    private $_requiredOAuthParameters = array();
+    protected $oauthParameters = array();
 
     /**
-     * Optional OAuth parameters for the request
-     * @var array
+     *
+     * @param string $url URL of the request, including query string
+     * @param string $verb HTTP verb (GET, POST, PUT, DELETE etc)
      */
-    private $_optionalOAuthParameters = array();
-
-    /**
-     * Array of HTTP headers
-     * @var array;
-     */
-    private $_headers = array();
-
-    /**
-     * The entity body of the HTPT message
-     * @var string
-     */
-    private $_entityBody;
-
-    /**
-     * The HTTP Request method
-     * @var string
-     */
-    private $_requestMethod = 'GET';
-
-    /**
-     * Full URL of this request
-     * @var string
-     */
-    private $_url;
-
-    /**
-     * URL components (from parse_url()) of the URL for this request
-     * @var array
-     */
-    private $_urlComponents;
-
-    /**
-     * A Consumer credential containing key and secret
-     * @var Consumer
-     */
-    private $_consumerCredentials;
-
-    /**
-     * The oauth parameters that do not exist elsewhere in the request
-     * @var Parameter\Collection
-     */
-    private $_oauthParameters;
-
-    /**
-     * Adds the required and optional parameters for all requests
-     */
-    public function __construct()
+    public function __construct(Credential\Consumer $consumer, $url,
+                                $verb = 'GET', $includeVersion = true)
     {
-        // Required parameters
-        $this->addRequiredOAuthParameters(array(
-            'oauth_consumer_key',
-            'oauth_signature_method'
-        ));
-
-        // Optional parameters
-        $this->addOptionalOAuthParameters(array(
-            'oauth_token',
-            'oauth_version'
-        ));
-
-        $this->_oauthParameters = new Parameter\Collection();
-    }
-
-    /**
-     * Set the Consumer Credential
-     * @param Consumer $consumerCredentials
-     */
-    public function setConsumerCredentials(\StasisMedia\OAuth\Credential\Consumer $consumerCredentials)
-    {
-        $this->_consumerCredentials = $consumerCredentials;
-
         $this->setOAuthParameters(array(
-            'oauth_consumer_key' => $this->_consumerCredentials->getKey()
+            new Parameter\Parameter('oauth_consumer_key', $consumer->getKey()),
+            new Parameter\Parameter('oauth_timestamp', $this->generateTimestamp()),
+            new Parameter\Parameter('oauth_nonce', $this->generateNonce())
         ));
-    }
 
-    /**
-     * Adds additional REQUIRED parameters to this request
-     * @param array $parameters Additional required parameters
-     */
-    public function addRequiredOAuthParameters(array $parameters)
-    {
-        foreach($parameters as $parameter)
+        $this->url = $url;
+        $this->verb = \strtoupper($verb);
+        if($includeVersion)
         {
-            if(!in_array($parameter, $this->_requiredOAuthParameters))
-            {
-                $this->_requiredOAuthParameters[] = $parameter;
-            }
-        }
+            $this->setOAuthParameter(new Parameter\Parameter('oauth_version', '1.0'));
+        }        
     }
 
     /**
-     * Adds additional OPTIONAL parameters to this request
-     * @param array $parameters Additional optional parameters
+     * Get the fully normalized parameters from all sources
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
+     *      *
+     * @return string Normalized string
      */
-    public function addOptionalOAuthParameters(array $parameters)
+    public function getNormalizedParameters()
     {
-        foreach($parameters as $parameter)
-        {
-            if(!in_array($parameter, $this->_optionalOAuthParameters))
-            {
-                $this->_optionalOAuthParameters[] = $parameter;
-            }
-        }
-    }
-
-    /**
-     * Check if all of the required parameters are present
-     * @return bool
-     */
-    public function hasRequiredParameters()
-    {
-        $missingParameters = $this->getMissingParameters();
-        if(count($missingParameters) > 0) return false;
-
-        return true;
-    }
-
-    public function getMissingParameters()
-    {
-        return array_diff($this->_requiredOAuthParameters, $this->getOAuthParameters()->getNames());
-    }
-
-    /**
-     * Collects the parameters from a number of collections, according to
-     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
-     *
-     * * The query component of the URI
-     * * The OAuth 'Authorization' header field
-     * * The entity body, only if:
-     *   * It is single part
-     *   * It is 'application/x-www-form-urlencoded'
-     *   * The 'Content-Type' header is 'application/x-www-form-urlencoded'
-     *
-     * Should never return an oauth_signature, as we do not allow it to be
-     * set within this class.
-     *
-     * Parameters should all be decoded, according to
-     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3
-     *
-     * @return Parameter\Collection
-     */
-    public function getParameters()
-    {
-        return Parameter\Collection::merge(
-            // 1. The query component
-            $this->_getQueryParameters(),
-            // 2. The Authorization header
-            $this->_getAuthorizationHeaderParameters(),
-            // 3. The entity-body
-            $this->_getEntityBodyParameters(),
-            // 4. Other OAuth parameters we generate or add
-            $this->getOAuthParameters()
-        );
-    }
-
-    /**
-     * Set a single oauth_ parameter
-     *
-     * @param string $key
-     * @param string $value
-     */
-    public function setOAuthParameter($key, $value)
-    {
-        if($key === 'oauth_signature') return;
+        // Query string parameters come back in an associative array, decoded
+        $parameters = $this->getQueryStringParameters();
+        $parameters = is_array($parameters) ? $parameters : array();
         
-        $this->setOAuthParameters(array($key => $value));
+        // Check if any of the queryParameters are dupes of postParameters
+        \array_map(function($parameter) use (&$parameters){
+            $name = $parameter->getName();
+
+            // If this is a dupe
+            if(\array_key_exists($name, $parameters))
+            {
+                foreach($parameter->getValue() as $value)
+                {
+                $parameters[$name]->addValue($value)    ;
+                }
+            } else {
+                // Not a dupe. Add it
+                $parameters[$name] = $parameter;
+            }
+        }, $this->getPostParameters());
+
+        // Add the OAuth parameters
+        $parameters = \array_merge($parameters, $this->getOAuthParameters());
+
+        // Sort them
+        usort($parameters, function($a, $b){
+            return strcmp(
+                \rawurlencode($a->getName()),
+                \rawurlencode($b->getName())
+            );
+        });
+
+        $pairs = array();
+        foreach($parameters as $parameter)
+        {
+            $pairs[] = $parameter->getNormalized();
+        }
+
+        return implode('&', $pairs);
     }
 
     /**
-     * Set an array of oauth_ parameters, overwriting old values
-     *
      * @param array $parameters
      */
     public function setOAuthParameters(array $parameters)
     {
-        foreach($parameters as $key => $value)
-        {
-            if($key === 'oauth_signature') continue;
-            $this->_oauthParameters->reset($key, $value);
-        }
+        $this->setParameters($this->oauthParameters, $parameters);
     }
 
     /**
-     * Return the oauth parameters
-     *
-     * @return Parameter\Collection
+     * @param Parameter\Parameter $parameter
      */
-    public function getOAuthParameters()
+    protected function setOAuthParameter(Parameter\Parameter $parameter)
     {
-        return $this->_oauthParameters;
+        $this->oauthParameters[$parameter->getName()] = $parameter;
     }
 
     /**
-     * Set the endpoint of the Request
-     *
-     * @param String $url
+     * @return Array of StasisMedia\OAuth\Parameter\Parameter
      */
-    public function setUrl($url)
+    protected function getOAuthParameters()
     {
-        $this->_url = $url;
 
-        $this->_urlComponents = parse_url($this->_url);
-    }
-
-    /**
-     * Get the endpoint of the Request
-     *
-     * @return String
-     */
-    public function getUrl()
-    {
-        return $this->_url;
-    }
-
-    /**
-     * The HTTP (or other, custom) request method
-     * @param string $method
-     */
-    public function setRequestMethod($method)
-    {
-        $this->_requestMethod = $method;
-    }
-
-
-    /**
-     * The HTTP (or other, custom) request method
-     * @return string $method
-     */
-    public function getRequestMethod()
-    {
-        return $this->_requestMethod;
-    }
-
-    /**
-     * Set the entity body. Note: the paramaters will not be returned from the
-     * entity body if the 'Content-Type' header is set to 'application/x-www-
-     * form-urlencoded'.
-     *
-     * This function will generally be called from $this->setPostData();
-     *
-     * @see setPostData
-     * @see _getParameters
-     *
-     * @param string $body
-     * @param string $contentType
-     */
-    public function setEntityBody($entityBody, $contentType = null)
-    {
-        $this->_entityBody = $entityBody;
-
-        if(empty($contentType) === false)
-        {
-            $this->_headers['Content-Type'] = $contentType;
-        }
-
+        return $this->oauthParameters;
     }
 
     /**
      * Set the entity-body to a query string derived from the parameters,
      * and set the 'Content-Type' header to 'application/x-www-form-urlencoded'
      *
-     * @param string $queryString
+     * @param array of Parameter\Parameter
      */
-    public function setPostParameters($queryString)
+    public function setPostParameters(array $parameters)
     {
-        $this->setEntityBody(
-            $queryString,
-            'application/x-www-form-urlencoded'
-        );
+        $this->setParameters($this->postParameters, $parameters);
+    }
+
+    protected function getPostParameters()
+    {
+        return $this->postParameters;
     }
 
     /**
-     * Returns the parameters currently in the entity body as a post request
-     *
-     * @return Parameter\Collection
+     * Parse the OAuth Authorization header into oauth_ parameters
+     * @param string $header
      */
-    public function getPostParameters()
+    public function setAuthorizationHeader($header)
     {
-        return $this->_getEntityBodyParameters();
-    }
+        // Remove 'Authorization: OAuth;
+        $header = \preg_replace('/^Authorization:\s?OAuth\s?/', '', $header);
 
-    /**
-     * Set the Authorization header to auth-scheme 'OAuth' and construct the
-     * header from the parameters
-     *
-     * @param array Parameters
-     * @param bool $encoded if the supplied parameters are encoded
-     */
-    public function setOAuthAuthorizationHeader($parameters, $encoded = false)
-    {
-        $pairs = array();
-        foreach($parameters as $key => $value)
+        $parameters = array();
+
+        $parts = preg_split('/,\s*/', $header);
+        
+        foreach($parts as $part)
         {
-            // Check if we need to encoded the parameters
-            $key = $encoded ? $key : rawurlencode($key);
-            $value = $encoded ? $value : rawurlencode($value);
+            $pair = explode('=', $part, 2);
 
-            $pairs[] = $key . '="' . $value . '"';
+            // Do NOT include the 'realm' parameter
+            if($pair[0] === 'realm') continue;
+
+            $parameters[] = new Parameter\Parameter(
+                $pair[0],
+                \rawurldecode(trim($pair[1], '"'))
+            );
         }
 
-        // Set the header
-        $this->_headers['Authorization'] = 'OAuth ' . implode(',', $pairs);
+        $this->setParameters($this->oauthParameters, $parameters);
     }
 
-    /**
-     * Get the key/value pairs of parameters supplied in the query string
-     * of the URL
-     *
-     * @return Parameter\Collection rawurldecoded
-     */
-    private function _getQueryParameters()
+    public function getAuthorizationHeader($realm, $signature = null)
     {
-        if(array_key_exists('query', $this->_urlComponents) === false) return null;
+        $parts = array();
+        foreach($this->getOAuthParameters() as $parameter)
+        {
+            // OAuth parameters can only have 1 value
+            $name = $parameter->getName();
+            $values = $parameter->getValue();
+            $parts[] = \rawurlencode($name) . '="' . \rawurlencode($values[0]) . '"';
+        }
+        $parts[] = 'oauth_signature="' . \rawurlencode($signature) . '"';
 
-        return Parameter\Collection::fromQueryString($this->_urlComponents['query']);
+        return 'Authorization: OAuth realm="' . $realm . '", ' . implode(', ', $parts);
     }
 
     /**
-     * Get the parameters from the Authorization header. We do not provide
-     * an interface to set a different scheme, so we immediately parse
-     * the parameters.
+     * Helper method to validate input as array of Parameter, and set target
      *
-     * The parameters will already be rawurlencoded
-     *
-     * @return Array rawurlencoded key/value pairs
+     * @param string $target var to set
+     * @param array $parameters
      */
-    private function _getAuthorizationHeaderParameters()
+    private function setParameters(&$target, $parameters)
     {
-        if(array_key_exists('Authorization', $this->_headers) === false) return null;
+        // Validate
+        \array_walk($parameters, function($parameter){
+            if( !($parameter instanceof Parameter\Parameter))
+            {
+                throw new \Exception('Only instances of StasisMedia\OAuth\Parameter\Parameter
+                                    permitted. Use ::fromArray() to convert.');
+            }
+        });
 
-        return Parameter\Collection::fromAuthorizationHeader($this->_headers['Authorization']);
+        // Populate the key value to help with searching
+        array_walk($parameters, function($value, $key) use (&$parameters)
+        {
+            // If the key is different to the name
+            if($key !== $value->getName())
+            {
+                $parameters[$value->getName()] = $value;
+                unset($parameters[$key]);
+            }
+        });
+
+        $target = $parameters;
     }
 
     /**
-     * Get the entity-body parameters, only if:
-     *   * It is single part
-     *   * It is 'application/x-www-form-urlencoded'
-     *   * The 'Content-Type' header is 'application/x-www-form-urlencoded'
-     *
-     * http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
-     *
-     * @return Parameter\Collection
+     * Parse the Parameters from the Query String
+     * @return array of Parameter\Parameter
      */
-    private function _getEntityBodyParameters()
+    protected function getQueryStringParameters()
     {
-        // If there is no entity body, return an empty array
-        if(empty($this->_entityBody) === true) return null;
+        $parts = parse_url($this->url);
 
-        // If no 'Content-Type' header
-        if(array_key_exists('Content-Type', $this->_headers) === false) return null;
+        if(\array_key_exists('query', $parts))
+        {
+            return Parameter\Parameter::fromQueryString($parts['query']);
+        }
 
-        return Parameter\Collection::fromEntityBody($this->_entityBody, $this->_headers['Content-Type']);
+        return null;
+    }
+
+
+    /**
+     * Generate the Base String for the request
+     * http://tools.ietf.org/html/rfc5849#section-3.4.1
+     *
+     * @return string
+     */
+    public function getBaseString($signatureMethod)
+    {
+        // Set the _oauth_signature_method
+        $this->setOAuthParameter(new Parameter\Parameter('oauth_signature_method',
+                                $signatureMethod));
+
+        // 1. The HTTP request method in uppercase
+        $baseString = $this->verb . '&';
+
+        // 2. The base string URI after being encoded
+        $baseString .= \rawurlencode($this->getBaseStringURI()) . '&';
+
+        // 3. The request parameters as normalized, after being encoded
+        $baseString .= \rawurlencode($this->getNormalizedParameters());
+
+        return $baseString;
     }
 
     /**
-     * Constructs the base string
+     * Generate the Base String URI
      * http://tools.ietf.org/html/rfc5849#section-3.4.1.2
+     *
+     * @return string
      */
-    public function getBaseStringURI()
+    protected function getBaseStringURI()
     {
-        $parts = $this->_urlComponents;
+        $parts =  parse_url($this->url);
 
         // http://host
         $baseStringURI =
@@ -455,26 +304,12 @@ abstract class Request implements RequestInterface
         return $baseStringURI;
     }
 
-
-    /**
-     * Throws an Exception for a missing response parameter
-     * @param string $parameter The missing parameter
-     */
-    protected function _throwMissingParameterException($parameter)
-    {
-        throw new \Exception\Parameter(sprintf(
-            'Required response parameter absent: \'%s\'',
-            $parameter
-        ));
-    }
-
-
     /**
      * Generates a 64-bit one-time nonce
      *
      * @return string The unique nonce
      */
-    protected function _generateNonce()
+    protected function generateNonce()
     {
         return md5(uniqid(rand(), true));
     }
@@ -483,7 +318,7 @@ abstract class Request implements RequestInterface
      * Returns the current unix timestamp
      * @return int Unix timestamp
      */
-    protected function _generateTimestamp()
+    protected function generateTimestamp()
     {
         return time();
     }
