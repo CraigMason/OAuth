@@ -7,7 +7,7 @@ class RequestToken extends Request
 {
     public function setCallbackUrl($url)
     {
-        $this->setOAuthParameter(new Parameter\Parameter('oauth_callback_url', $url));
+        $this->setOAuthParameter(new Parameter\Parameter('oauth_callback', $url));
     }
 
 }
