@@ -32,11 +32,12 @@ abstract class Request implements RequestInterface
     public function __construct(Credential\Consumer $consumer, $url,
                                 $verb = 'GET', $includeVersion = true)
     {
-        $this->setOAuthParameters(array(
-            new Parameter\Parameter('oauth_consumer_key', $consumer->getKey()),
-            new Parameter\Parameter('oauth_timestamp', $this->generateTimestamp()),
-            new Parameter\Parameter('oauth_nonce', $this->generateNonce())
-        ));
+        $this->setOAuthParameter(
+            new Parameter\Parameter('oauth_consumer_key', $consumer->getKey())
+        );
+
+        $this->generateTimestamp();
+        $this->generateNonce();
 
         $this->url = $url;
         $this->verb = \strtoupper($verb);
@@ -44,6 +45,16 @@ abstract class Request implements RequestInterface
         {
             $this->setOAuthParameter(new Parameter\Parameter('oauth_version', '1.0'));
         }        
+    }
+
+    /**
+     * Regenerate the per-request items. This allows the client to re-use the
+     * same Request object for many connections to the same endpoint
+     */
+    public function reset()
+    {
+        $this->generateTimestamp();
+        $this->generateNonce();
     }
 
     /**
@@ -112,11 +123,11 @@ abstract class Request implements RequestInterface
     }
 
     /**
+     * Generates a timestamp and nonce, then returns all oauth_* parameters
      * @return Array of StasisMedia\OAuth\Parameter\Parameter
      */
     protected function getOAuthParameters()
     {
-
         return $this->oauthParameters;
     }
 
@@ -311,7 +322,10 @@ abstract class Request implements RequestInterface
      */
     protected function generateNonce()
     {
-        return md5(uniqid(rand(), true));
+        $this->setOAuthParameter(new Parameter\Parameter(
+            'oauth_nonce',
+            md5(uniqid(rand(), true))
+        ));
     }
 
     /**
@@ -320,7 +334,10 @@ abstract class Request implements RequestInterface
      */
     protected function generateTimestamp()
     {
-        return time();
+        $this->setOAuthParameter(new Parameter\Parameter(
+            'oauth_timestamp',
+            time()
+        ));
     }
 
 }
