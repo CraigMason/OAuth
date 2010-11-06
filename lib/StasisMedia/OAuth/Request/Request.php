@@ -299,7 +299,7 @@ abstract class Request implements RequestInterface
                    if($scheme != 'http') $baseStringURI .= ':' . $port;
                    break;
                case 443:
-                   if($scheme != 'http') $baseStringURI .= ':' . $port;
+                   if($scheme != 'https') $baseStringURI .= ':' . $port;
                    break;
                default:
                    $baseStringURI .= ':' . $port;
