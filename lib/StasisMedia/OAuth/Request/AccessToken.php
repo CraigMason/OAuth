@@ -11,4 +11,9 @@ class AccessToken extends Request
         $this->setOAuthParameter(new Parameter\Parameter('oauth_token', $credential->getToken()));
     }
 
+    public function setVerifier($verifier)
+    {
+        $this->setOAuthParameter(new Parameter\Parameter('oauth_verifier', $verifier));
+    }
+
 }
