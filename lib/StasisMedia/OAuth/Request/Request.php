@@ -6,6 +6,9 @@ use StasisMedia\OAuth\Credential;
 
 abstract class Request implements RequestInterface
 {
+    const POST_FORM = 'application/x-www-form-urlencoded';
+    const POST_MULTIPART = 'multipart/form-data';
+
     protected $url;
     protected $verb;
 
@@ -132,14 +135,17 @@ abstract class Request implements RequestInterface
     }
 
     /**
-     * Set the entity-body to a query string derived from the parameters,
-     * and set the 'Content-Type' header to 'application/x-www-form-urlencoded'
+     * Set the entity-body to a query string derived from the parameters, ONLY
+     * if the type is 'application/x-www-form-urlencoded'
      *
      * @param array of Parameter\Parameter
      */
-    public function setPostParameters(array $parameters)
+    public function setPostParameters(array $parameters, $type=self::POST_FORM)
     {
-        $this->setParameters($this->postParameters, $parameters);
+        if($type === self::POST_FORM)
+        {
+            $this->setParameters($this->postParameters, $parameters);
+        }
     }
 
     protected function getPostParameters()
